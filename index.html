@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NYU AV Command Center</title>
+<style>
+/* === GLOBAL RESET & DESIGN TOKENS === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d1117; --surface: #161b22; --border: #30363d;
+  --accent: #f0b429; --text: #e6edf3; --text-muted: #8b949e;
+  --green: #3fb950; --red: #f85149; --blue: #58a6ff;
+  --font-ui: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+body { font-family: var(--font-ui); background: var(--bg); color: var(--text); min-height: 100vh; }
+button { cursor: pointer; font-family: inherit; }
+input, select { font-family: inherit; }
+
+/* === LOGIN SCREEN === */
+#login-screen {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+}
+.login-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 40px; width: 360px; text-align: center;
+}
+.login-card h1 { font-size: 18px; color: var(--accent); margin-bottom: 4px; letter-spacing: 1px; }
+.login-card .subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+.login-card input {
+  display: block; width: 100%; padding: 10px 12px; margin-bottom: 12px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text); font-size: 14px; outline: none;
+}
+.login-card input:focus { border-color: var(--accent); }
+.login-card .btn-login {
+  width: 100%; padding: 10px; background: var(--accent); color: var(--bg);
+  border: none; border-radius: 4px; font-size: 14px; font-weight: 600;
+}
+.login-card .btn-login:hover { opacity: 0.9; }
+.login-error { color: var(--red); font-size: 13px; margin-bottom: 12px; min-height: 18px; }
+
+/* === DASHBOARD === */
+#dashboard { display: none; }
+.topnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--border);
+}
+.topnav .app-title { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+.topnav .user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.role-badge {
+  padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+}
+.role-badge.manager { background: rgba(240,180,41,0.15); color: var(--accent); }
+.role-badge.technician { background: rgba(88,166,255,0.15); color: var(--blue); }
+.btn-logout {
+  padding: 5px 12px; background: transparent; border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text-muted); font-size: 12px;
+}
+.btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+/* === STATS ROW === */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 20px 24px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+  padding: 16px 20px;
+}
+.stat-card .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+.stat-card .value.green { color: var(--green); }
+.stat-card .value.blue { color: var(--blue); }
+.stat-card .value.amber { color: var(--accent); }
+
+/* === MAIN GRID === */
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 24px 16px; }
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.panel-header {
+  padding: 12px 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+}
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+.status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600;
+}
+.status-badge.online, .status-badge.confirmed { background: rgba(63,185,80,0.15); color: var(--green); }
+.status-badge.offline { background: rgba(248,81,73,0.15); color: var(--red); }
+.status-badge.standby, .status-badge.pending { background: rgba(240,180,41,0.15); color: var(--accent); }
+.status-badge.on-site { background: rgba(88,166,255,0.15); color: var(--blue); }
+
+/* === ACTION BUTTONS === */
+.btn-command {
+  padding: 4px 10px; border-radius: 3px; font-size: 11px; font-weight: 600; border: none;
+}
+.btn-command.active { background: var(--accent); color: var(--bg); }
+.btn-command.active:hover { opacity: 0.85; }
+.btn-command.disabled {
+  background: var(--border); color: var(--text-muted); cursor: not-allowed; position: relative;
+}
+.btn-command.disabled:hover::after {
+  content: 'Manager access required'; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+  background: var(--bg); border: 1px solid var(--border); padding: 4px 8px; border-radius: 3px;
+  font-size: 10px; white-space: nowrap; color: var(--text-muted);
+}
+
+/* === MODAL === */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  align-items: center; justify-content: center; z-index: 100;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  width: 520px; max-height: 85vh; overflow-y: auto;
+}
+.modal-head {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.modal-head h2 { font-size: 15px; }
+.modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-body label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; margin-top: 14px; }
+.modal-body label:first-child { margin-top: 0; }
+.modal-body .field-value { font-size: 14px; color: var(--text); }
+.modal-body select, .modal-body input[type=range] {
+  width: 100%; padding: 8px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text); font-size: 13px;
+}
+.offline-warning {
+  margin-top: 12px; padding: 8px 12px; background: rgba(248,81,73,0.1);
+  border: 1px solid rgba(248,81,73,0.3); border-radius: 4px; font-size: 12px; color: var(--red);
+}
+.payload-preview {
+  margin-top: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+  padding: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--green);
+  white-space: pre; overflow-x: auto; max-height: 220px; overflow-y: auto; line-height: 1.5;
+}
+.modal-foot { padding: 16px 20px; border-top: 1px solid var(--border); text-align: right; }
+.btn-fire {
+  padding: 8px 20px; background: var(--accent); color: var(--bg); border: none;
+  border-radius: 4px; font-size: 13px; font-weight: 600;
+}
+.btn-fire:hover { opacity: 0.85; }
+.btn-fire:disabled { opacity: 0.4; cursor: not-allowed; }
+.vol-display { font-size: 13px; color: var(--accent); margin-top: 4px; }
+
+/* === COMMAND LOG === */
+.command-log {
+  margin: 0 24px 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.log-header {
+  padding: 10px 16px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);
+  color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: none;
+}
+.live-dot.active { display: inline-block; animation: pulse 1s ease-in-out 3; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.log-body {
+  max-height: 220px; overflow-y: auto; padding: 12px 16px;
+  font-family: var(--font-mono); font-size: 12px; background: #0a0e14;
+}
+.log-empty { color: var(--text-muted); font-style: italic; }
+.log-entry { padding: 6px 0; border-bottom: 1px solid rgba(48,54,61,0.5); cursor: pointer; }
+.log-entry:last-child { border-bottom: none; }
+.log-entry .log-summary { color: var(--green); }
+.log-entry .log-summary .ts { color: var(--text-muted); }
+.log-entry .log-summary .action { color: var(--accent); }
+.log-entry .log-detail {
+  display: none; margin-top: 6px; padding: 8px; background: var(--bg);
+  border-radius: 3px; color: var(--accent); white-space: pre; overflow-x: auto; line-height: 1.4;
+}
+.log-entry.expanded .log-detail { display: block; }
+.log-entry.highlight { animation: amberFade 2s ease-out; }
+@keyframes amberFade { 0% { background: rgba(240,180,41,0.2); } 100% { background: transparent; } }
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- === LOGIN SCREEN === -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>NYU AV COMMAND CENTER</h1>
+    <p class="subtitle">AV & Media Services — Operations Dashboard</p>
+    <div class="login-error" id="login-error"></div>
+    <input type="text" id="input-user" placeholder="Username" autocomplete="off">
+    <input type="password" id="input-pass" placeholder="Password">
+    <button class="btn-login" id="btn-login">Sign In</button>
+  </div>
+</div>
+
+<!-- === DASHBOARD === -->
+<div id="dashboard">
+  <nav class="topnav">
+    <span class="app-title">&#9670; NYU AV COMMAND CENTER</span>
+    <div class="user-info">
+      <span id="user-display"></span>
+      <span class="role-badge" id="role-badge"></span>
+      <button class="btn-logout" id="btn-logout">Logout</button>
+    </div>
+  </nav>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">Total Equipment</div><div class="value" id="stat-total">0</div></div>
+    <div class="stat-card"><div class="label">Online Devices</div><div class="value green" id="stat-online">0</div></div>
+    <div class="stat-card"><div class="label">Active Staff Today</div><div class="value blue" id="stat-staff">0</div></div>
+    <div class="stat-card"><div class="label">Pending Commands</div><div class="value amber" id="stat-pending">0</div></div>
+  </div>
+
+  <div class="main-grid">
+    <div class="panel">
+      <div class="panel-header">AV Equipment Inventory</div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th>
+      </tr></thead><tbody id="equip-tbody"></tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Staff Shift Schedule</div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th>
+      </tr></thead><tbody id="staff-tbody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="command-log">
+    <div class="log-header"><span class="live-dot" id="live-dot"></span> Command Log</div>
+    <div class="log-body" id="log-body"><div class="log-empty">No commands dispatched this session.</div></div>
+  </div>
+</div>
+
+<!-- === COMMAND BUILDER MODAL === -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Command Builder</h2>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <label>Target Device</label>
+      <div class="field-value" id="modal-device"></div>
+      <label>IP Address</label>
+      <div class="field-value" id="modal-ip"></div>
+      <div class="offline-warning" id="modal-offline" style="display:none">
+        &#9888; Device is currently Offline — command will be queued.
+      </div>
+      <label>Command</label>
+      <select id="modal-cmd">
+        <option value="power_on">power_on</option>
+        <option value="power_off">power_off</option>
+        <option value="reboot">reboot</option>
+        <option value="mute_audio">mute_audio</option>
+        <option value="unmute_audio">unmute_audio</option>
+        <option value="switch_input_hdmi">switch_input_hdmi</option>
+        <option value="switch_input_vga">switch_input_vga</option>
+        <option value="set_volume">set_volume</option>
+      </select>
+      <div id="vol-group" style="display:none">
+        <label>Volume Level</label>
+        <input type="range" id="modal-vol" min="0" max="100" value="50">
+        <div class="vol-display">Level: <span id="vol-val">50</span>%</div>
+      </div>
+      <label>Preview Payload</label>
+      <div class="payload-preview" id="payload-preview"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-fire" id="btn-fire">&#9889; Fire Command</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// NYU AV COMMAND CENTER — Application Logic
+// ============================================================================
+
+// === AUTHENTICATION — Demo credentials (NOT for production use) ===
+const CREDENTIALS = [
+  { username: "technician", password: "tech123", role: "technician", name: "Alex Rivera" },
+  { username: "manager",    password: "mgr456",  role: "manager",    name: "Jordan Lee" }
+];
+
+// Session state (in-memory only, not persisted)
+let session = null;
+let pendingCount = 0;
+let activeDeviceId = null;
+
+// === Spreadsheet A: AV Equipment Inventory | Source: Google Sheets mock ===
+const EQUIPMENT = [
+  { id: "EQ-001", device_name: "Crestron DM-NVX-350",     device_type: "Video Switcher",    building: "Bobst Library",              room: "LL1-03",  floor: "LL1", ip_address: "10.18.4.101",  status: "Online",  last_ping: "2026-06-18 09:42:11", assigned_tech: "Alex Rivera" },
+  { id: "EQ-002", device_name: "Biamp Tesira SERVER-IO",   device_type: "DSP",               building: "Kimmel Center",              room: "802",     floor: "8",   ip_address: "10.18.6.55",   status: "Online",  last_ping: "2026-06-18 09:41:58", assigned_tech: "Sam Patel" },
+  { id: "EQ-003", device_name: "Epson Pro L1755U",         device_type: "Projector",         building: "Stern School of Business",   room: "310",     floor: "3",   ip_address: "10.18.8.22",   status: "Standby", last_ping: "2026-06-18 08:15:30", assigned_tech: "Jordan Lee" },
+  { id: "EQ-004", device_name: "QSC Q-SYS Core 110f",     device_type: "DSP",               building: "Tandon School of Engineering",room: "LC-400", floor: "4",   ip_address: "10.19.2.10",   status: "Online",  last_ping: "2026-06-18 09:43:01", assigned_tech: "Alex Rivera" },
+  { id: "EQ-005", device_name: "Extron SW4 HD 4K PLUS",   device_type: "Video Switcher",    building: "Silver Center",              room: "503",     floor: "5",   ip_address: "10.18.3.88",   status: "Offline", last_ping: "2026-06-17 22:10:44", assigned_tech: "Priya Nair" },
+  { id: "EQ-006", device_name: "Samsung QM85R-B",          device_type: "Display",           building: "Courant Institute",          room: "109",     floor: "1",   ip_address: "10.18.5.130",  status: "Online",  last_ping: "2026-06-18 09:40:05", assigned_tech: "Sam Patel" },
+  { id: "EQ-007", device_name: "Shure MXA920 Ceiling Mic", device_type: "Microphone System", building: "Tisch School of the Arts",   room: "B-50",    floor: "B",   ip_address: "10.18.7.201",  status: "Online",  last_ping: "2026-06-18 09:42:47", assigned_tech: "Casey Lin" },
+  { id: "EQ-008", device_name: "Christie DWU850-GS",       device_type: "Projector",         building: "Palladium Athletic Facility", room: "Gym-A",  floor: "1",   ip_address: "10.18.9.15",   status: "Standby", last_ping: "2026-06-18 07:55:00", assigned_tech: "Jordan Lee" },
+  { id: "EQ-009", device_name: "Sennheiser TeamConnect",   device_type: "Microphone System", building: "Bobst Library",              room: "619",     floor: "6",   ip_address: "10.18.4.175",  status: "Online",  last_ping: "2026-06-18 09:43:12", assigned_tech: "Priya Nair" },
+  { id: "EQ-010", device_name: "LG LSAB012-M4 LED Wall",  device_type: "Display",           building: "Kimmel Center",              room: "Lobby",   floor: "1",   ip_address: "10.18.6.240",  status: "Offline", last_ping: "2026-06-16 18:30:22", assigned_tech: "Casey Lin" }
+];
+
+// === Spreadsheet B: Staff Shift Schedules | Source: Google Sheets mock ===
+const STAFF = [
+  { id: "ST-001", staff_name: "Alex Rivera",   role: "Lead Technician", shift_date: "2026-06-18", shift_start: "07:00", shift_end: "15:00", location: "Bobst Library",               status: "On-Site" },
+  { id: "ST-002", staff_name: "Sam Patel",     role: "AV Technician",   shift_date: "2026-06-18", shift_start: "08:00", shift_end: "16:00", location: "Kimmel Center",               status: "On-Site" },
+  { id: "ST-003", staff_name: "Jordan Lee",    role: "Lead Technician", shift_date: "2026-06-18", shift_start: "09:00", shift_end: "17:00", location: "Stern School of Business",    status: "Confirmed" },
+  { id: "ST-004", staff_name: "Priya Nair",    role: "AV Technician",   shift_date: "2026-06-18", shift_start: "10:00", shift_end: "18:00", location: "Silver Center",               status: "Confirmed" },
+  { id: "ST-005", staff_name: "Casey Lin",     role: "AV Technician",   shift_date: "2026-06-18", shift_start: "12:00", shift_end: "20:00", location: "Tisch School of the Arts",    status: "Pending" },
+  { id: "ST-006", staff_name: "Morgan Diaz",   role: "Event Support",   shift_date: "2026-06-18", shift_start: "14:00", shift_end: "22:00", location: "Palladium Athletic Facility",  status: "Pending" },
+  { id: "ST-007", staff_name: "Taylor Brooks", role: "Event Support",   shift_date: "2026-06-18", shift_start: "06:00", shift_end: "14:00", location: "Tandon School of Engineering", status: "On-Site" },
+  { id: "ST-008", staff_name: "Riley Chen",    role: "AV Technician",   shift_date: "2026-06-19", shift_start: "08:00", shift_end: "16:00", location: "Courant Institute",           status: "Confirmed" }
+];
+
+// === DOM REFERENCES ===
+const dom = {
+  loginScreen:  document.getElementById('login-screen'),
+  dashboard:    document.getElementById('dashboard'),
+  inputUser:    document.getElementById('input-user'),
+  inputPass:    document.getElementById('input-pass'),
+  loginError:   document.getElementById('login-error'),
+  btnLogin:     document.getElementById('btn-login'),
+  btnLogout:    document.getElementById('btn-logout'),
+  userDisplay:  document.getElementById('user-display'),
+  roleBadge:    document.getElementById('role-badge'),
+  statTotal:    document.getElementById('stat-total'),
+  statOnline:   document.getElementById('stat-online'),
+  statStaff:    document.getElementById('stat-staff'),
+  statPending:  document.getElementById('stat-pending'),
+  equipTbody:   document.getElementById('equip-tbody'),
+  staffTbody:   document.getElementById('staff-tbody'),
+  modalOverlay: document.getElementById('modal-overlay'),
+  modalClose:   document.getElementById('modal-close'),
+  modalDevice:  document.getElementById('modal-device'),
+  modalIp:      document.getElementById('modal-ip'),
+  modalOffline: document.getElementById('modal-offline'),
+  modalCmd:     document.getElementById('modal-cmd'),
+  volGroup:     document.getElementById('vol-group'),
+  modalVol:     document.getElementById('modal-vol'),
+  volVal:       document.getElementById('vol-val'),
+  payloadPre:   document.getElementById('payload-preview'),
+  btnFire:      document.getElementById('btn-fire'),
+  logBody:      document.getElementById('log-body'),
+  liveDot:      document.getElementById('live-dot')
+};
+
+// === HELPERS ===
+const now = () => {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+const isoNow = () => new Date().toISOString();
+const statusClass = s => s.toLowerCase().replace('-', '-');
+
+// === LOGIN LOGIC ===
+function attemptLogin() {
+  const u = dom.inputUser.value.trim();
+  const p = dom.inputPass.value;
+  const match = CREDENTIALS.find(c => c.username === u && c.password === p);
+  if (!match) {
+    dom.loginError.textContent = 'Invalid credentials';
+    dom.inputPass.value = '';
+    return;
+  }
+  session = { ...match };
+  dom.loginError.textContent = '';
+  showDashboard();
+}
+
+function logout() {
+  session = null;
+  pendingCount = 0;
+  dom.loginScreen.style.display = 'flex';
+  dom.dashboard.style.display = 'none';
+  dom.inputUser.value = '';
+  dom.inputPass.value = '';
+  dom.logBody.innerHTML = '<div class="log-empty">No commands dispatched this session.</div>';
+}
+
+// === DASHBOARD RENDERING ===
+function showDashboard() {
+  dom.loginScreen.style.display = 'none';
+  dom.dashboard.style.display = 'block';
+  dom.userDisplay.textContent = session.name;
+  dom.roleBadge.textContent = session.role;
+  dom.roleBadge.className = 'role-badge ' + session.role;
+  renderStats();
+  renderEquipment();
+  renderStaff();
+}
+
+function renderStats() {
+  const onlineCount = EQUIPMENT.filter(e => e.status === 'Online').length;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const activeStaff = STAFF.filter(s => s.shift_date === todayStr && s.status !== 'Pending').length;
+  dom.statTotal.textContent = EQUIPMENT.length;
+  dom.statOnline.textContent = onlineCount;
+  dom.statStaff.textContent = activeStaff;
+  dom.statPending.textContent = pendingCount;
+}
+
+function renderEquipment() {
+  dom.equipTbody.innerHTML = EQUIPMENT.map(eq => {
+    const sc = eq.status.toLowerCase();
+    // RBAC: technician role sees disabled button, manager gets active button
+    const actionBtn = session.role === 'manager'
+      ? `<button class="btn-command active" data-eqid="${eq.id}">&#9889; Send Command</button>`
+      : `<button class="btn-command disabled" title="Manager access required">&#128274; Send Command</button>`;
+    return `<tr>
+      <td>${eq.device_name}</td><td>${eq.device_type}</td>
+      <td>${eq.building}, ${eq.room}</td><td style="font-family:var(--font-mono);font-size:12px">${eq.ip_address}</td>
+      <td><span class="status-badge ${sc}">${eq.status}</span></td>
+      <td>${actionBtn}</td>
+    </tr>`;
+  }).join('');
+
+  // Attach event listeners (not inline handlers)
+  dom.equipTbody.querySelectorAll('.btn-command.active').forEach(btn => {
+    btn.addEventListener('click', () => openModal(btn.dataset.eqid));
+  });
+}
+
+function renderStaff() {
+  dom.staffTbody.innerHTML = STAFF.map(st => {
+    const sc = st.status.toLowerCase().replace('-', '-');
+    return `<tr>
+      <td>${st.staff_name}</td><td>${st.role}</td>
+      <td>${st.shift_start}–${st.shift_end}</td>
+      <td>${st.location}</td>
+      <td><span class="status-badge ${sc}">${st.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// === COMMAND BUILDER MODAL ===
+function openModal(eqId) {
+  // RBAC: role check — technician role blocked from command dispatch
+  if (!session || session.role !== 'manager') return;
+  const device = EQUIPMENT.find(e => e.id === eqId);
+  if (!device) return;
+  activeDeviceId = eqId;
+  dom.modalDevice.textContent = `${device.device_name} (${device.device_type})`;
+  dom.modalIp.textContent = device.ip_address;
+  dom.modalOffline.style.display = device.status === 'Offline' ? 'block' : 'none';
+  dom.modalCmd.value = 'power_on';
+  dom.volGroup.style.display = 'none';
+  dom.modalVol.value = 50;
+  dom.volVal.textContent = '50';
+  dom.btnFire.disabled = false;
+  updatePreview();
+  dom.modalOverlay.classList.add('open');
+}
+
+function closeModal() {
+  dom.modalOverlay.classList.remove('open');
+  activeDeviceId = null;
+}
+
+function buildPayload() {
+  const device = EQUIPMENT.find(e => e.id === activeDeviceId);
+  if (!device) return {};
+  const cmd = dom.modalCmd.value;
+  const params = cmd === 'set_volume'
+    ? { level: parseInt(dom.modalVol.value, 10), unit: "percent" }
+    : {};
+  return {
+    api_version: "1.0",
+    timestamp: isoNow(),
+    issued_by: { user: session.username, role: "manager" },
+    target_device: {
+      device_id: device.id,
+      device_name: device.device_name,
+      device_type: device.device_type,
+      ip_address: device.ip_address,
+      location: { building: device.building, room: device.room }
+    },
+    command: { action: cmd, parameters: params },
+    status: "dispatched"
+  };
+}
+
+function updatePreview() {
+  dom.payloadPre.textContent = JSON.stringify(buildPayload(), null, 2);
+}
+
+function fireCommand() {
+  // RBAC: role check — technician role blocked from command dispatch
+  if (!session || session.role !== 'manager') return;
+  if (dom.btnFire.disabled) return;
+
+  const payload = buildPayload();
+  const device = EQUIPMENT.find(e => e.id === activeDeviceId);
+
+  // Prevent double-firing: disable for 1 second
+  dom.btnFire.disabled = true;
+  setTimeout(() => { dom.btnFire.disabled = false; }, 1000);
+
+  // Increment pending counter
+  pendingCount++;
+  dom.statPending.textContent = pendingCount;
+
+  // Append to command log
+  appendLog(device, payload);
+
+  closeModal();
+}
+
+// === COMMAND LOG ===
+function appendLog(device, payload) {
+  // Clear empty state message
+  const empty = dom.logBody.querySelector('.log-empty');
+  if (empty) empty.remove();
+
+  const entry = document.createElement('div');
+  entry.className = 'log-entry highlight';
+  entry.innerHTML = `<div class="log-summary">
+    <span class="ts">[${now()}]</span> <span class="action">DISPATCHED</span> &#8594; ${device.device_name} @ ${device.ip_address} — <em>${payload.command.action}</em> <span style="color:var(--text-muted);font-size:10px">(click to expand)</span>
+  </div>
+  <div class="log-detail">${JSON.stringify(payload, null, 2)}</div>`;
+
+  entry.addEventListener('click', () => entry.classList.toggle('expanded'));
+  dom.logBody.prepend(entry);
+  dom.logBody.scrollTop = 0;
+
+  // Activate pulsing green dot
+  dom.liveDot.classList.remove('active');
+  void dom.liveDot.offsetWidth; // reflow to restart animation
+  dom.liveDot.classList.add('active');
+}
+
+// === EVENT LISTENERS (no inline handlers) ===
+dom.btnLogin.addEventListener('click', attemptLogin);
+dom.inputPass.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+dom.inputUser.addEventListener('keydown', e => { if (e.key === 'Enter') dom.inputPass.focus(); });
+dom.btnLogout.addEventListener('click', logout);
+dom.modalClose.addEventListener('click', closeModal);
+dom.modalOverlay.addEventListener('click', e => { if (e.target === dom.modalOverlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+dom.modalCmd.addEventListener('change', () => {
+  dom.volGroup.style.display = dom.modalCmd.value === 'set_volume' ? 'block' : 'none';
+  updatePreview();
+});
+dom.modalVol.addEventListener('input', () => {
+  dom.volVal.textContent = dom.modalVol.value;
+  updatePreview();
+});
+dom.btnFire.addEventListener('click', fireCommand);
+</script>
+</body>
+</html>
