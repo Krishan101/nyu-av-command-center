@@ -1,233 +1,237 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NYU AV Command Center</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>◆</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2357068C'/><text x='3' y='12.5' font-size='11' font-weight='bold' fill='white' font-family='sans-serif'>AV</text></svg>">
 <style>
-/* === RESET & DESIGN TOKENS === */
+/* === RESET === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* === THEME TOKENS === */
 :root{
-  --bg:#0b0e14;--surface:#12161f;--surface2:#181d28;--border:#242a38;--border-light:#2d3548;
-  --accent:#e8a824;--accent-dim:rgba(232,168,36,0.12);--accent-glow:rgba(232,168,36,0.25);
-  --text:#d8dee9;--text-dim:#6c7a96;--text-bright:#f0f4fc;
-  --green:#34d399;--green-dim:rgba(52,211,153,0.12);
-  --red:#f87171;--red-dim:rgba(248,113,113,0.12);
-  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.12);
-  --violet:#a78bfa;--violet-dim:rgba(167,139,250,0.12);
+  --nyu:#57068C;--nyu-light:#7B2FBF;--nyu-dark:#3D0066;--nyu-pale:#f0e6f6;--nyu-faint:#f8f4fb;
+  --green:#16a34a;--green-bg:#dcfce7;--green-border:#bbf7d0;
+  --red:#dc2626;--red-bg:#fee2e2;--red-border:#fecaca;
+  --amber:#d97706;--amber-bg:#fef3c7;--amber-border:#fde68a;
+  --blue:#2563eb;--blue-bg:#dbeafe;--blue-border:#bfdbfe;
   --font:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
   --mono:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;
-  --radius:6px;
+  --radius:8px;--radius-sm:5px;
 }
+
+/* === LIGHT THEME (default) === */
+[data-theme="light"]{
+  --bg:#f7f7f8;--surface:#ffffff;--surface2:#fafafa;--border:#e5e5e5;--border-light:#ebebeb;
+  --text:#1a1a2e;--text-dim:#6b7280;--text-bright:#111111;
+  --accent:var(--nyu);--accent-light:var(--nyu-light);--accent-pale:var(--nyu-pale);--accent-faint:var(--nyu-faint);
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --log-bg:#1e1232;--log-text:#c4b5fd;--log-accent:#a78bfa;--log-dim:#7c6c9a;
+  --topbar-bg:var(--nyu);--topbar-text:#ffffff;
+  --badge-text-green:#15803d;--badge-text-red:#dc2626;--badge-text-amber:#b45309;--badge-text-blue:#1d4ed8;
+}
+
+/* === DARK THEME === */
+[data-theme="dark"]{
+  --bg:#0c0816;--surface:#161024;--surface2:#1c1430;--border:#2d2445;--border-light:#3a2f55;
+  --text:#e2daf0;--text-dim:#8b7faa;--text-bright:#f5f0ff;
+  --accent:#9b5de5;--accent-light:#b47ee8;--accent-pale:rgba(155,93,229,0.15);--accent-faint:rgba(155,93,229,0.06);
+  --shadow:0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.4);
+  --log-bg:#0a0612;--log-text:#c4b5fd;--log-accent:#b47ee8;--log-dim:#5a4d73;
+  --topbar-bg:#1c1430;--topbar-text:#e2daf0;
+  --green:#4ade80;--green-bg:rgba(74,222,128,0.12);--green-border:rgba(74,222,128,0.2);
+  --red:#f87171;--red-bg:rgba(248,113,113,0.12);--red-border:rgba(248,113,113,0.2);
+  --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.12);--amber-border:rgba(251,191,36,0.2);
+  --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.12);--blue-border:rgba(96,165,250,0.2);
+  --badge-text-green:#4ade80;--badge-text-red:#f87171;--badge-text-amber:#fbbf24;--badge-text-blue:#60a5fa;
+}
+
 html{font-size:14px}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:
-  radial-gradient(ellipse 80% 50% at 50% -20%,rgba(232,168,36,0.03),transparent),
-  radial-gradient(ellipse 60% 40% at 80% 110%,rgba(96,165,250,0.02),transparent);
-  pointer-events:none;z-index:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
 button{cursor:pointer;font-family:inherit}
 
-/* === ANIMATED GRID BACKGROUND === */
-.grid-bg{position:fixed;inset:0;z-index:0;opacity:0.03;
-  background-image:linear-gradient(var(--text-dim) 1px,transparent 1px),
-  linear-gradient(90deg,var(--text-dim) 1px,transparent 1px);
-  background-size:60px 60px}
-
 /* === LOGIN === */
-#login{display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;z-index:1}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:44px 40px 36px;width:380px;position:relative;overflow:hidden}
-.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.login-brand{text-align:center;margin-bottom:32px}
-.login-brand .icon{width:48px;height:48px;border-radius:12px;background:var(--accent-dim);border:1px solid rgba(232,168,36,0.2);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
-.login-brand .icon svg{width:24px;height:24px;stroke:var(--accent);fill:none;stroke-width:1.5}
-.login-brand h1{font-size:16px;font-weight:700;color:var(--text-bright);letter-spacing:1.5px}
-.login-brand p{font-size:12px;color:var(--text-dim);margin-top:4px}
-.login-card input{display:block;width:100%;padding:11px 14px;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;outline:none;transition:border .2s}
-.login-card input:focus{border-color:var(--accent)}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:48px 40px 36px;width:400px;box-shadow:var(--shadow-md);text-align:center}
+.login-brand{margin-bottom:32px}
+.login-brand .nyu-logo{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--nyu);border-radius:14px;margin-bottom:16px}
+.login-brand .nyu-logo svg{width:28px;height:28px;fill:#fff}
+.login-brand h1{font-size:20px;font-weight:800;color:var(--text-bright);letter-spacing:0.5px}
+.login-brand h1 span{color:var(--accent)}
+.login-brand p{font-size:13px;color:var(--text-dim);margin-top:4px}
+.login-card input{display:block;width:100%;padding:12px 14px;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;transition:border .2s}
+.login-card input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
 .login-card input::placeholder{color:var(--text-dim)}
-.btn-login{width:100%;padding:11px;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);font-size:13px;font-weight:700;letter-spacing:0.5px;transition:opacity .15s;margin-top:6px}
-.btn-login:hover{opacity:.88}
-.login-error{color:var(--red);font-size:12px;text-align:center;margin-bottom:10px;min-height:17px}
-.login-hint{font-size:11px;color:var(--text-dim);text-align:center;margin-top:18px;line-height:1.6}
+.btn-login{width:100%;padding:12px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;transition:background .15s;margin-top:4px}
+.btn-login:hover{background:var(--nyu-light)}
+.login-error{color:var(--red);font-size:12px;margin-bottom:10px;min-height:17px}
+.login-hint{font-size:11px;color:var(--text-dim);margin-top:20px;line-height:1.7;background:var(--accent-faint);border:1px solid var(--accent-pale);border-radius:var(--radius-sm);padding:10px 14px;text-align:left}
+.login-hint strong{color:var(--accent)}
 .login-hint code{background:var(--bg);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:10px}
 
-/* === DASHBOARD SHELL === */
-#dash{display:none;position:relative;z-index:1}
+/* === DASHBOARD === */
+#dash{display:none}
 
-/* === TOP SYSTEM BAR === */
-.sysbar{display:flex;align-items:center;justify-content:space-between;padding:6px 24px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim)}
-.sysbar .left{display:flex;align-items:center;gap:16px}
-.sys-indicator{display:flex;align-items:center;gap:5px}
-.sys-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:1}50%{opacity:.4}}
-.sys-dot.warn{background:var(--accent);animation-duration:1.5s}
-.sys-dot.err{background:var(--red);animation-duration:.8s}
+/* === TOP BAR === */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:var(--topbar-bg);color:var(--topbar-text)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{font-size:15px;font-weight:800;letter-spacing:0.5px;display:flex;align-items:center;gap:8px}
+.topbar-logo .torch{width:22px;height:22px}
+[data-theme="light"] .topbar-logo .torch{fill:#fff}
+[data-theme="dark"] .topbar-logo .torch{fill:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-clock{font-family:var(--mono);font-size:12px;opacity:0.75}
+.user-pill{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;background:rgba(255,255,255,0.12);border-radius:20px;font-size:12px}
+[data-theme="dark"] .user-pill{background:rgba(255,255,255,0.06)}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.role-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.15);color:inherit}
+.btn-theme{padding:4px 8px;background:rgba(255,255,255,0.12);border:none;border-radius:var(--radius-sm);color:inherit;font-size:14px;transition:background .15s}
+.btn-theme:hover{background:rgba(255,255,255,0.2)}
+.btn-out{padding:5px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:inherit;font-size:11px;font-weight:600;transition:all .15s}
+.btn-out:hover{background:rgba(255,255,255,0.15)}
 
-/* === NAVBAR === */
-.navbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surface2);border-bottom:1px solid var(--border)}
-.nav-left{display:flex;align-items:center;gap:10px}
-.nav-logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#c78a10);display:flex;align-items:center;justify-content:center}
-.nav-logo svg{width:16px;height:16px;fill:var(--bg)}
-.nav-title{font-size:15px;font-weight:800;color:var(--text-bright);letter-spacing:0.8px}
-.nav-title span{color:var(--accent)}
-.nav-right{display:flex;align-items:center;gap:14px}
-.nav-clock{font-family:var(--mono);font-size:12px;color:var(--text-dim);min-width:70px;text-align:right}
-.user-pill{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 8px;background:var(--surface);border:1px solid var(--border);border-radius:20px}
-.user-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--bg)}
-.user-avatar.manager{background:var(--accent)}
-.user-avatar.technician{background:var(--blue)}
-.user-name{font-size:12px;font-weight:600}
-.role-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 6px;border-radius:3px}
-.role-tag.manager{background:var(--accent-dim);color:var(--accent)}
-.role-tag.technician{background:var(--blue-dim);color:var(--blue)}
-.btn-out{padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:var(--radius);color:var(--text-dim);font-size:11px;transition:all .15s}
-.btn-out:hover{border-color:var(--red);color:var(--red)}
+/* === SECONDARY NAV === */
+.subnav{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim)}
+.subnav .sys-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;animation:breathe 3s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* === STATS === */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:18px 24px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color .2s}
-.stat:hover{border-color:var(--border-light)}
-.stat::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
-.stat:nth-child(1)::before{background:var(--text-dim)}
-.stat:nth-child(2)::before{background:var(--green)}
-.stat:nth-child(3)::before{background:var(--blue)}
-.stat:nth-child(4)::before{background:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 24px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .stat .label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;font-weight:600}
-.stat .val{font-size:32px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums}
-.stat .val.g{color:var(--green)}.stat .val.b{color:var(--blue)}.stat .val.a{color:var(--accent)}
-.stat .sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+.stat .val{font-size:34px;font-weight:800;margin-top:6px;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .val.g{color:var(--green)}.stat .val.b{color:var(--blue)}.stat .val.a{color:var(--amber)}
+.stat .sub{font-size:11px;color:var(--text-dim);margin-top:4px}
 
 /* === PANELS === */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px 14px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.panel-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.panel-head h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim)}
-.panel-head .count{font-size:11px;color:var(--text-dim);background:var(--bg);padding:2px 8px;border-radius:10px}
-.tbl-wrap{overflow-x:auto}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-head h2{font-size:13px;font-weight:700;color:var(--text-bright)}
+.panel-head .count{font-size:11px;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px;font-weight:600}
+.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:9px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--border);position:sticky;top:0}
-td{padding:10px 14px;border-bottom:1px solid rgba(36,42,56,0.6);font-size:12.5px;white-space:nowrap}
+th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,0.015)}
+tr:hover td{background:var(--accent-faint)}
+td strong{color:var(--text-bright);font-weight:600}
 
 /* === BADGES === */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:0.3px}
-.badge::before{content:'';width:5px;height:5px;border-radius:50%}
-.badge.online,.badge.confirmed{background:var(--green-dim);color:var(--green)}.badge.online::before,.badge.confirmed::before{background:var(--green)}
-.badge.offline{background:var(--red-dim);color:var(--red)}.badge.offline::before{background:var(--red)}
-.badge.standby,.badge.pending{background:var(--accent-dim);color:var(--accent)}.badge.standby::before,.badge.pending::before{background:var(--accent)}
-.badge.on-site{background:var(--blue-dim);color:var(--blue)}.badge.on-site::before{background:var(--blue)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:700}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%}
+.badge.online,.badge.confirmed{background:var(--green-bg);color:var(--badge-text-green);border:1px solid var(--green-border)}.badge.online::before,.badge.confirmed::before{background:var(--green)}
+.badge.offline{background:var(--red-bg);color:var(--badge-text-red);border:1px solid var(--red-border)}.badge.offline::before{background:var(--red)}
+.badge.standby,.badge.pending{background:var(--amber-bg);color:var(--badge-text-amber);border:1px solid var(--amber-border)}.badge.standby::before,.badge.pending::before{background:var(--amber)}
+.badge.on-site{background:var(--blue-bg);color:var(--badge-text-blue);border:1px solid var(--blue-border)}.badge.on-site::before{background:var(--blue)}
 
 /* === ACTION BUTTONS === */
-.btn-cmd{padding:5px 12px;border-radius:4px;font-size:11px;font-weight:700;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
-.btn-cmd.active{background:linear-gradient(135deg,var(--accent),#c78a10);color:var(--bg)}
+.btn-cmd{padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.btn-cmd.active{background:var(--nyu);color:#fff}
+[data-theme="dark"] .btn-cmd.active{background:var(--accent)}
 .btn-cmd.active:hover{opacity:.85;transform:translateY(-1px)}
 .btn-cmd.locked{background:var(--border);color:var(--text-dim);cursor:not-allowed;position:relative}
-.btn-cmd.locked:hover::after{content:'Manager access required';position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border-light);padding:5px 10px;border-radius:4px;font-size:10px;white-space:nowrap;z-index:10}
+.btn-cmd.locked:hover::after{content:'Manager access required';position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);padding:5px 10px;border-radius:var(--radius-sm);font-size:10px;white-space:nowrap;z-index:10;box-shadow:var(--shadow-md)}
 .ip-cell{font-family:var(--mono);font-size:11.5px;color:var(--text-dim)}
 
 /* === MODAL === */
-.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:100}
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:100}
 .modal-wrap.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border-light);border-radius:10px;width:540px;max-height:88vh;overflow-y:auto;position:relative}
-.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:10px 10px 0 0}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:540px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .modal-top{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.modal-top h2{font-size:14px;font-weight:700;color:var(--text-bright)}
-.modal-x{background:none;border:none;color:var(--text-dim);font-size:20px;line-height:1;padding:4px}.modal-x:hover{color:var(--text)}
+.modal-top h2{font-size:15px;font-weight:700;color:var(--text-bright);display:flex;align-items:center;gap:8px}
+.modal-top h2 .cmd-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.modal-x{background:none;border:none;color:var(--text-dim);font-size:22px;line-height:1;padding:4px}.modal-x:hover{color:var(--text)}
 .modal-body{padding:22px}
 .mf{margin-bottom:16px}
-.mf-label{display:block;font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
-.mf-value{font-size:13px;color:var(--text-bright)}
-.mf select,.mf input[type=range]{width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;outline:none}
-.mf select:focus{border-color:var(--accent)}
-.offline-warn{padding:10px 14px;background:var(--red-dim);border:1px solid rgba(248,113,113,0.25);border-radius:var(--radius);font-size:12px;color:var(--red);margin-bottom:16px;display:none}
-.preview-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-family:var(--mono);font-size:11px;color:var(--green);white-space:pre;overflow-x:auto;max-height:200px;overflow-y:auto;line-height:1.5}
+.mf-label{display:block;font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px}
+.mf-value{font-size:13px;color:var(--text-bright);font-weight:500}
+.mf select{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none}
+.mf select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+.offline-warn{padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-size:12px;color:var(--red);margin-bottom:16px;display:none}
+.preview-box{background:var(--log-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:var(--mono);font-size:11px;color:var(--log-accent);white-space:pre;overflow-x:auto;max-height:200px;overflow-y:auto;line-height:1.5}
 .vol-row{display:flex;align-items:center;gap:12px;margin-top:6px}
 .vol-row input[type=range]{flex:1;accent-color:var(--accent)}
-.vol-num{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:36px;text-align:right}
-.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
-.btn-fire{padding:9px 22px;background:linear-gradient(135deg,var(--accent),#c78a10);color:var(--bg);border:none;border-radius:var(--radius);font-size:13px;font-weight:700;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.vol-num{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:36px;text-align:right;font-weight:700}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+.btn-fire{padding:10px 24px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;transition:all .15s}
+[data-theme="dark"] .btn-fire{background:var(--accent)}
 .btn-fire:hover{opacity:.88;transform:translateY(-1px)}.btn-fire:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
 /* === COMMAND LOG === */
-.cmdlog{margin:0 24px 24px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.cmdlog-head{padding:10px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim)}
+.cmdlog{margin:0 24px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.cmdlog-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text-bright)}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:none}
 .live-dot.on{display:inline-block;animation:pulse 1s ease-in-out 3}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-.cmdlog-body{max-height:240px;overflow-y:auto;padding:14px 18px;background:#080b11;font-family:var(--mono);font-size:11.5px;position:relative}
-.cmdlog-body::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.008) 2px,rgba(255,255,255,0.008) 4px);pointer-events:none}
-.log-empty{color:var(--text-dim);font-style:italic}
-.log-entry{padding:7px 0;border-bottom:1px solid rgba(36,42,56,0.4);cursor:pointer;position:relative;z-index:1}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+.cmdlog-body{max-height:240px;overflow-y:auto;padding:14px 18px;background:var(--log-bg);font-family:var(--mono);font-size:11.5px;position:relative}
+.log-empty{color:var(--log-dim);font-style:italic}
+.log-entry{padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;position:relative}
 .log-entry:last-child{border-bottom:none}
-.log-line{color:var(--green)}
-.log-line .ts{color:var(--text-dim)}
-.log-line .act{color:var(--accent);font-weight:700}
-.log-line .dev{color:var(--text-bright)}
-.log-line .hint{color:var(--text-dim);font-size:10px}
-.log-detail{display:none;margin-top:8px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--accent);white-space:pre;overflow-x:auto;line-height:1.4;font-size:11px}
+.log-line{color:var(--log-text)}
+.log-line .ts{color:var(--log-dim)}
+.log-line .act{color:var(--log-accent);font-weight:700}
+.log-line .dev{color:#f0f0f0;font-weight:600}
+.log-line .hint{color:var(--log-dim);font-size:10px}
+.log-detail{display:none;margin-top:8px;padding:10px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:var(--log-accent);white-space:pre;overflow-x:auto;line-height:1.4;font-size:11px}
 .log-entry.open .log-detail{display:block}
-.log-entry.flash{animation:flashAmber 2s ease-out}
-@keyframes flashAmber{0%{background:rgba(232,168,36,0.15)}100%{background:transparent}}
+.log-entry.flash{animation:flashPurple 2s ease-out}
+@keyframes flashPurple{0%{background:rgba(155,93,229,0.2)}100%{background:transparent}}
 
 /* === TOAST === */
-.toast{position:fixed;top:20px;right:20px;background:var(--surface2);border:1px solid var(--green);border-radius:8px;padding:12px 18px;font-size:12px;font-weight:600;color:var(--green);z-index:200;transform:translateX(120%);transition:transform .3s ease;display:flex;align-items:center;gap:8px}
+.toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 18px;font-size:12px;font-weight:600;color:var(--green);z-index:200;transform:translateX(120%);transition:transform .3s ease;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:8px}
 .toast.show{transform:translateX(0)}
-.toast svg{width:16px;height:16px;stroke:var(--green);fill:none}
+.toast svg{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2.5}
 
 /* === RESPONSIVE === */
 @media(max-width:1080px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.stats{grid-template-columns:1fr}.sysbar{display:none}}
+@media(max-width:600px){.stats{grid-template-columns:1fr}.subnav{display:none}.topbar{flex-wrap:wrap;gap:8px}}
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-
-<!-- === LOGIN === -->
 <div id="login">
   <div class="login-card">
     <div class="login-brand">
-      <div class="icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
-      <h1>NYU AV COMMAND CENTER</h1>
+      <div class="nyu-logo"><svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.39 7.5 12 10.82 5.61 7.5 12 4.18zM5 9.32l6 3.33v6.03l-6-3.33V9.32zm8 9.36v-6.03l6-3.33v6.03l-6 3.33z"/></svg></div>
+      <h1><span>NYU</span> AV Command Center</h1>
       <p>AV &amp; Media Services — Operations Dashboard</p>
     </div>
     <div class="login-error" id="login-err"></div>
     <input type="text" id="in-user" placeholder="Username" autocomplete="off" spellcheck="false">
     <input type="password" id="in-pass" placeholder="Password">
     <button class="btn-login" id="btn-login">Sign In</button>
-    <div class="login-hint">Demo: <code>manager</code> / <code>mgr456</code> or <code>technician</code> / <code>tech123</code></div>
+    <div class="login-hint"><strong>Demo Credentials</strong><br>Manager: <code>manager</code> / <code>mgr456</code><br>Technician: <code>technician</code> / <code>tech123</code></div>
   </div>
 </div>
 
-<!-- === DASHBOARD === -->
 <div id="dash">
-  <!-- System bar -->
-  <div class="sysbar">
-    <div class="left">
-      <div class="sys-indicator"><div class="sys-dot"></div> System Online</div>
-      <span>|</span><span>Network: 10.18.x.x</span><span>|</span><span id="sys-equip"></span>
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">
+        <svg class="torch" viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.39 7.5 12 10.82 5.61 7.5 12 4.18zM5 9.32l6 3.33v6.03l-6-3.33V9.32zm8 9.36v-6.03l6-3.33v6.03l-6 3.33z"/></svg>
+        NYU AV Command Center
+      </div>
     </div>
-    <span id="sys-time"></span>
-  </div>
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-left">
-      <div class="nav-logo"><svg viewBox="0 0 16 16"><polygon points="8,1 1,5 8,9 15,5"/><polygon points="1,8 8,12 15,8" opacity=".6"/><polygon points="1,11 8,15 15,11" opacity=".3"/></svg></div>
-      <div class="nav-title"><span>NYU</span> AV COMMAND CENTER</div>
-    </div>
-    <div class="nav-right">
-      <div class="nav-clock" id="clock"></div>
+    <div class="topbar-right">
+      <div class="topbar-clock" id="clock"></div>
       <div class="user-pill">
         <div class="user-avatar" id="u-avatar"></div>
-        <span class="user-name" id="u-name"></span>
+        <span id="u-name"></span>
         <span class="role-tag" id="u-role"></span>
       </div>
+      <button class="btn-theme" id="btn-theme" title="Toggle theme">🌙</button>
       <button class="btn-out" id="btn-out">Logout</button>
     </div>
-  </nav>
+  </div>
+  <div class="subnav">
+    <span><span class="sys-dot"></span> System Online — Network 10.18.x.x — <span id="sys-eq"></span></span>
+    <span id="sys-time"></span>
+  </div>
 
-  <!-- Stats -->
   <div class="stats">
     <div class="stat"><div class="label">Total Equipment</div><div class="val" id="s-total">0</div><div class="sub">Across 8 buildings</div></div>
     <div class="stat"><div class="label">Online Devices</div><div class="val g" id="s-online">0</div><div class="sub" id="s-online-sub"></div></div>
@@ -235,58 +239,49 @@ tr:hover td{background:rgba(255,255,255,0.015)}
     <div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">0</div><div class="sub">This session</div></div>
   </div>
 
-  <!-- Tables -->
   <div class="grid">
-    <div class="panel"><div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count" id="eq-count"></div></div><div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead><tbody id="eq-tb"></tbody></table></div></div>
-    <div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count" id="st-count"></div></div><div class="tbl-wrap" style="max-height:420px;overflow-y:auto"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="st-tb"></tbody></table></div></div>
+    <div class="panel"><div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count" id="eq-count"></div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead><tbody id="eq-tb"></tbody></table></div></div>
+    <div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count" id="st-count"></div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="st-tb"></tbody></table></div></div>
   </div>
 
-  <!-- Command Log -->
   <div class="cmdlog">
     <div class="cmdlog-head"><div class="live-dot" id="live-dot"></div> Command Log</div>
     <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands…</div></div>
   </div>
 </div>
 
-<!-- === MODAL === -->
+<!-- Modal -->
 <div class="modal-wrap" id="modal-wrap">
   <div class="modal">
-    <div class="modal-top"><h2>⚡ Command Builder</h2><button class="modal-x" id="modal-x">&times;</button></div>
+    <div class="modal-top"><h2><span class="cmd-dot"></span> Command Builder</h2><button class="modal-x" id="modal-x">&times;</button></div>
     <div class="modal-body">
       <div class="mf"><div class="mf-label">Target Device</div><div class="mf-value" id="m-dev"></div></div>
       <div class="mf"><div class="mf-label">IP Address</div><div class="mf-value ip-cell" id="m-ip"></div></div>
       <div class="offline-warn" id="m-warn">⚠ Device is currently Offline — command will be queued.</div>
-      <div class="mf"><div class="mf-label">Command</div>
-        <select id="m-cmd"><option value="power_on">power_on</option><option value="power_off">power_off</option><option value="reboot">reboot</option><option value="mute_audio">mute_audio</option><option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option><option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option></select>
-      </div>
+      <div class="mf"><div class="mf-label">Command</div><select id="m-cmd"><option value="power_on">power_on</option><option value="power_off">power_off</option><option value="reboot">reboot</option><option value="mute_audio">mute_audio</option><option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option><option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option></select></div>
       <div class="mf" id="vol-grp" style="display:none"><div class="mf-label">Volume Level</div><div class="vol-row"><input type="range" id="m-vol" min="0" max="100" value="50"><div class="vol-num"><span id="vol-v">50</span>%</div></div></div>
       <div class="mf"><div class="mf-label">Payload Preview</div><div class="preview-box" id="m-preview"></div></div>
     </div>
     <div class="modal-foot"><button class="btn-fire" id="btn-fire">⚡ Fire Command</button></div>
   </div>
 </div>
-
-<!-- === TOAST === -->
-<div class="toast" id="toast"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
 
 <script>
 // ============================================================================
-// NYU AV COMMAND CENTER — Core Application
+// NYU AV COMMAND CENTER
 // ============================================================================
 
-// === AUTHENTICATION — Demo credentials only (NOT for production) ===
-// In production: replace with NYU SSO (Shibboleth) via backend auth service
+// === AUTHENTICATION — Demo only (NOT for production) ===
+// Production: NYU SSO (Shibboleth/SAML) via backend auth service
 const CREDS = [
   { username: "technician", password: "tech123", role: "technician", name: "Alex Rivera" },
   { username: "manager",    password: "mgr456",  role: "manager",    name: "Jordan Lee" }
 ];
-let session = null;
-let pendingCount = 0;
-let activeEqId = null;
+let session = null, pendingCount = 0, activeEqId = null;
 
-// === Spreadsheet A: AV Equipment Inventory ===
-// Source: data/equipment-inventory.csv (mock Google Sheets export)
-// In production: pulled via Google Sheets API with caching layer
+// === Spreadsheet A: AV Equipment Inventory | Source: data/equipment-inventory.csv ===
+// Production: Google Sheets API with Redis caching layer
 const EQUIPMENT = [
   { id:"EQ-001", device_name:"Crestron DM-NVX-350",     device_type:"Video Switcher",    building:"Bobst Library",               room:"LL1-03", floor:"LL1", ip_address:"10.18.4.101", status:"Online",  last_ping:"2026-06-18 09:42:11", assigned_tech:"Alex Rivera" },
   { id:"EQ-002", device_name:"Biamp Tesira SERVER-IO",   device_type:"DSP",               building:"Kimmel Center",               room:"802",    floor:"8",   ip_address:"10.18.6.55",  status:"Online",  last_ping:"2026-06-18 09:41:58", assigned_tech:"Sam Patel" },
@@ -300,9 +295,7 @@ const EQUIPMENT = [
   { id:"EQ-010", device_name:"LG LSAB012-M4 LED Wall",  device_type:"Display",           building:"Kimmel Center",               room:"Lobby",  floor:"1",   ip_address:"10.18.6.240", status:"Offline", last_ping:"2026-06-16 18:30:22", assigned_tech:"Casey Lin" }
 ];
 
-// === Spreadsheet B: Staff Shift Schedules ===
-// Source: data/staff-schedules.csv (mock Google Sheets export)
-// In production: pulled via Google Sheets API with caching layer
+// === Spreadsheet B: Staff Shift Schedules | Source: data/staff-schedules.csv ===
 const STAFF = [
   { id:"ST-001", staff_name:"Alex Rivera",   role:"Lead Technician", shift_date:"2026-06-18", shift_start:"07:00", shift_end:"15:00", location:"Bobst Library",               status:"On-Site" },
   { id:"ST-002", staff_name:"Sam Patel",     role:"AV Technician",   shift_date:"2026-06-18", shift_start:"08:00", shift_end:"16:00", location:"Kimmel Center",               status:"On-Site" },
@@ -318,10 +311,10 @@ const STAFF = [
 const $ = id => document.getElementById(id);
 const dom = {
   login:$('login'), dash:$('dash'), inUser:$('in-user'), inPass:$('in-pass'), loginErr:$('login-err'),
-  btnLogin:$('btn-login'), btnOut:$('btn-out'), uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'),
-  clock:$('clock'), sysTime:$('sys-time'), sysEquip:$('sys-equip'),
-  sTotal:$('s-total'), sOnline:$('s-online'), sOnlineSub:$('s-online-sub'), sStaff:$('s-staff'),
-  sStaffSub:$('s-staff-sub'), sPending:$('s-pending'),
+  btnLogin:$('btn-login'), btnOut:$('btn-out'), btnTheme:$('btn-theme'),
+  uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'), clock:$('clock'), sysTime:$('sys-time'), sysEq:$('sys-eq'),
+  sTotal:$('s-total'), sOnline:$('s-online'), sOnlineSub:$('s-online-sub'),
+  sStaff:$('s-staff'), sStaffSub:$('s-staff-sub'), sPending:$('s-pending'),
   eqTb:$('eq-tb'), stTb:$('st-tb'), eqCount:$('eq-count'), stCount:$('st-count'),
   modalWrap:$('modal-wrap'), modalX:$('modal-x'), mDev:$('m-dev'), mIp:$('m-ip'),
   mWarn:$('m-warn'), mCmd:$('m-cmd'), volGrp:$('vol-grp'), mVol:$('m-vol'), volV:$('vol-v'),
@@ -336,18 +329,24 @@ const fmtDate = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.g
 const fmtFull = () => `${fmtDate()} ${fmtTime()}`;
 const isoNow = () => new Date().toISOString();
 
+// === THEME TOGGLE ===
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  html.setAttribute('data-theme', next);
+  dom.btnTheme.textContent = next === 'light' ? '🌙' : '☀️';
+}
+
 // === CLOCK ===
-const tickClock = () => { dom.clock.textContent = fmtTime(); dom.sysTime.textContent = `${fmtDate()} ${fmtTime()}`; };
-setInterval(tickClock, 1000); tickClock();
+const tick = () => { dom.clock.textContent = fmtTime(); dom.sysTime.textContent = fmtFull(); };
+setInterval(tick, 1000); tick();
 
 // === AUTH ===
 function doLogin() {
   const u = dom.inUser.value.trim(), p = dom.inPass.value;
   const match = CREDS.find(c => c.username === u && c.password === p);
   if (!match) { dom.loginErr.textContent = 'Invalid credentials'; dom.inPass.value = ''; return; }
-  session = { ...match };
-  dom.loginErr.textContent = '';
-  initDash();
+  session = { ...match }; dom.loginErr.textContent = ''; initDash();
 }
 function doLogout() {
   session = null; pendingCount = 0;
@@ -362,11 +361,10 @@ function initDash() {
   dom.uName.textContent = session.name;
   dom.uRole.textContent = session.role;
   dom.uRole.className = 'role-tag ' + session.role;
-  dom.uAvatar.textContent = session.name.split(' ').map(w=>w[0]).join('');
+  dom.uAvatar.textContent = session.name.split(' ').map(w => w[0]).join('');
   dom.uAvatar.className = 'user-avatar ' + session.role;
   renderStats(); renderEquipment(); renderStaff();
 }
-
 function renderStats() {
   const online = EQUIPMENT.filter(e => e.status === 'Online').length;
   const offline = EQUIPMENT.filter(e => e.status === 'Offline').length;
@@ -379,23 +377,22 @@ function renderStats() {
   dom.sStaff.textContent = active;
   dom.sStaffSub.textContent = `${onSite} on-site now`;
   dom.sPending.textContent = pendingCount;
-  dom.sysEquip.textContent = `Devices: ${online}/${EQUIPMENT.length} online`;
+  dom.sysEq.textContent = `Devices: ${online}/${EQUIPMENT.length} online`;
 }
-
 function renderEquipment() {
   dom.eqCount.textContent = `${EQUIPMENT.length} devices`;
   dom.eqTb.innerHTML = EQUIPMENT.map(eq => {
     const sc = eq.status.toLowerCase();
-    // RBAC: technician role sees locked button; manager gets active button
+    // RBAC: technician sees locked button; manager gets active button
     const btn = session.role === 'manager'
       ? `<button class="btn-cmd active" data-id="${eq.id}">⚡ Command</button>`
       : `<button class="btn-cmd locked">🔒 Command</button>`;
     return `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td><span class="badge ${sc}">${eq.status}</span></td><td>${btn}</td></tr>`;
   }).join('');
-  // addEventListener only — no inline handlers
-  dom.eqTb.querySelectorAll('.btn-cmd.active').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
+  dom.eqTb.querySelectorAll('.btn-cmd.active').forEach(b =>
+    b.addEventListener('click', () => openModal(b.dataset.id))
+  );
 }
-
 function renderStaff() {
   dom.stCount.textContent = `${STAFF.length} entries`;
   dom.stTb.innerHTML = STAFF.map(s => {
@@ -404,7 +401,7 @@ function renderStaff() {
   }).join('');
 }
 
-// === COMMAND MODAL ===
+// === MODAL ===
 function openModal(eqId) {
   // RBAC: role check — technician role blocked from command dispatch
   if (!session || session.role !== 'manager') return;
@@ -414,15 +411,12 @@ function openModal(eqId) {
   dom.mDev.textContent = `${dev.device_name}  ·  ${dev.device_type}`;
   dom.mIp.textContent = dev.ip_address;
   dom.mWarn.style.display = dev.status === 'Offline' ? 'block' : 'none';
-  dom.mCmd.value = 'power_on';
-  dom.volGrp.style.display = 'none';
+  dom.mCmd.value = 'power_on'; dom.volGrp.style.display = 'none';
   dom.mVol.value = 50; dom.volV.textContent = '50';
-  dom.btnFire.disabled = false;
-  updatePreview();
+  dom.btnFire.disabled = false; updatePreview();
   dom.modalWrap.classList.add('open');
 }
 function closeModal() { dom.modalWrap.classList.remove('open'); activeEqId = null; }
-
 function buildPayload() {
   const dev = EQUIPMENT.find(e => e.id === activeEqId);
   if (!dev) return {};
@@ -431,23 +425,21 @@ function buildPayload() {
   return {
     api_version: "1.0", timestamp: isoNow(),
     issued_by: { user: session.username, role: "manager" },
-    target_device: { device_id: dev.id, device_name: dev.device_name, device_type: dev.device_type, ip_address: dev.ip_address, location: { building: dev.building, room: dev.room } },
-    command: { action: cmd, parameters: params },
-    status: "dispatched"
+    target_device: { device_id: dev.id, device_name: dev.device_name, device_type: dev.device_type,
+      ip_address: dev.ip_address, location: { building: dev.building, room: dev.room } },
+    command: { action: cmd, parameters: params }, status: "dispatched"
   };
 }
 function updatePreview() { dom.mPreview.textContent = JSON.stringify(buildPayload(), null, 2); }
-
 function fireCommand() {
-  // RBAC: role check — technician role blocked from command dispatch (enforced in logic, not just UI)
+  // RBAC: enforced in logic — technician blocked even if DOM is manipulated
   if (!session || session.role !== 'manager') return;
   if (dom.btnFire.disabled) return;
   const payload = buildPayload();
   const dev = EQUIPMENT.find(e => e.id === activeEqId);
   dom.btnFire.disabled = true;
-  setTimeout(() => { dom.btnFire.disabled = false; }, 1000); // prevent double-fire
-  pendingCount++;
-  dom.sPending.textContent = pendingCount;
+  setTimeout(() => { dom.btnFire.disabled = false; }, 1000);
+  pendingCount++; dom.sPending.textContent = pendingCount;
   appendLog(dev, payload);
   showToast(`Command dispatched → ${dev.device_name}`);
   closeModal();
@@ -461,31 +453,25 @@ function appendLog(dev, payload) {
   el.className = 'log-entry flash';
   el.innerHTML = `<div class="log-line"><span class="ts">[${fmtFull()}]</span> <span class="act">DISPATCHED</span> → <span class="dev">${dev.device_name}</span> @ ${dev.ip_address} — ${payload.command.action} <span class="hint">(click to expand)</span></div><div class="log-detail">${JSON.stringify(payload, null, 2)}</div>`;
   el.addEventListener('click', () => el.classList.toggle('open'));
-  dom.logBody.prepend(el);
-  dom.logBody.scrollTop = 0;
-  dom.liveDot.classList.remove('on');
-  void dom.liveDot.offsetWidth;
-  dom.liveDot.classList.add('on');
+  dom.logBody.prepend(el); dom.logBody.scrollTop = 0;
+  dom.liveDot.classList.remove('on'); void dom.liveDot.offsetWidth; dom.liveDot.classList.add('on');
 }
-
-// === TOAST ===
 function showToast(msg) {
-  dom.toastMsg.textContent = msg;
-  dom.toast.classList.add('show');
+  dom.toastMsg.textContent = msg; dom.toast.classList.add('show');
   setTimeout(() => dom.toast.classList.remove('show'), 2500);
 }
 
-// === EVENT LISTENERS (no inline handlers) ===
+// === EVENT LISTENERS (addEventListener only — no inline handlers) ===
 dom.btnLogin.addEventListener('click', doLogin);
 dom.inPass.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 dom.inUser.addEventListener('keydown', e => { if (e.key === 'Enter') dom.inPass.focus(); });
 dom.btnOut.addEventListener('click', doLogout);
+dom.btnTheme.addEventListener('click', toggleTheme);
 dom.modalX.addEventListener('click', closeModal);
 dom.modalWrap.addEventListener('click', e => { if (e.target === dom.modalWrap) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 dom.mCmd.addEventListener('change', () => {
-  dom.volGrp.style.display = dom.mCmd.value === 'set_volume' ? 'block' : 'none';
-  updatePreview();
+  dom.volGrp.style.display = dom.mCmd.value === 'set_volume' ? 'block' : 'none'; updatePreview();
 });
 dom.mVol.addEventListener('input', () => { dom.volV.textContent = dom.mVol.value; updatePreview(); });
 dom.btnFire.addEventListener('click', fireCommand);
