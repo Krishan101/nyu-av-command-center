@@ -6,10 +6,8 @@
 <title>NYU AV Command Center</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2357068C'/><text x='1.5' y='12' font-size='10' font-weight='900' fill='white' font-family='Arial,sans-serif'>NYU</text></svg>">
 <style>
-/* === RESET === */
+/* === RESET & TOKENS === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-/* === THEME TOKENS === */
 :root{
   --nyu:#57068C;--nyu-light:#7B2FBF;--nyu-dark:#3D0066;--nyu-pale:#f0e6f6;--nyu-faint:#f8f4fb;
   --green:#16a34a;--green-bg:#dcfce7;--green-border:#bbf7d0;
@@ -20,40 +18,32 @@
   --mono:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;
   --radius:8px;--radius-sm:5px;
 }
-
-/* === LIGHT THEME (default) === */
 [data-theme="light"]{
-  --bg:#f7f7f8;--surface:#ffffff;--surface2:#fafafa;--border:#e5e5e5;--border-light:#ebebeb;
-  --text:#1a1a2e;--text-dim:#6b7280;--text-bright:#111111;
-  --accent:var(--nyu);--accent-light:var(--nyu-light);--accent-pale:var(--nyu-pale);--accent-faint:var(--nyu-faint);
-  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --bg:#f7f7f8;--surface:#fff;--surface2:#fafafa;--border:#e5e5e5;--border-light:#ebebeb;
+  --text:#1a1a2e;--text-dim:#6b7280;--text-bright:#111;
+  --accent:var(--nyu);--accent-pale:var(--nyu-pale);--accent-faint:var(--nyu-faint);
+  --shadow:0 1px 3px rgba(0,0,0,0.06);--shadow-md:0 4px 12px rgba(0,0,0,0.08);
   --log-bg:#1e1232;--log-text:#c4b5fd;--log-accent:#a78bfa;--log-dim:#7c6c9a;
-  --topbar-bg:var(--nyu);--topbar-text:#ffffff;
-  --badge-text-green:#15803d;--badge-text-red:#dc2626;--badge-text-amber:#b45309;--badge-text-blue:#1d4ed8;
+  --topbar-bg:var(--nyu);--topbar-text:#fff;
+  --badge-green:#15803d;--badge-red:#dc2626;--badge-amber:#b45309;--badge-blue:#1d4ed8;
 }
-
-/* === DARK THEME === */
 [data-theme="dark"]{
   --bg:#0c0816;--surface:#161024;--surface2:#1c1430;--border:#2d2445;--border-light:#3a2f55;
   --text:#e2daf0;--text-dim:#8b7faa;--text-bright:#f5f0ff;
-  --accent:#9b5de5;--accent-light:#b47ee8;--accent-pale:rgba(155,93,229,0.15);--accent-faint:rgba(155,93,229,0.06);
-  --shadow:0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md:0 4px 12px rgba(0,0,0,0.4);
+  --accent:#9b5de5;--accent-pale:rgba(155,93,229,0.15);--accent-faint:rgba(155,93,229,0.06);
+  --shadow:0 1px 3px rgba(0,0,0,0.3);--shadow-md:0 4px 12px rgba(0,0,0,0.4);
   --log-bg:#0a0612;--log-text:#c4b5fd;--log-accent:#b47ee8;--log-dim:#5a4d73;
   --topbar-bg:#1c1430;--topbar-text:#e2daf0;
   --green:#4ade80;--green-bg:rgba(74,222,128,0.12);--green-border:rgba(74,222,128,0.2);
   --red:#f87171;--red-bg:rgba(248,113,113,0.12);--red-border:rgba(248,113,113,0.2);
   --amber:#fbbf24;--amber-bg:rgba(251,191,36,0.12);--amber-border:rgba(251,191,36,0.2);
   --blue:#60a5fa;--blue-bg:rgba(96,165,250,0.12);--blue-border:rgba(96,165,250,0.2);
-  --badge-text-green:#4ade80;--badge-text-red:#f87171;--badge-text-amber:#fbbf24;--badge-text-blue:#60a5fa;
+  --badge-green:#4ade80;--badge-red:#f87171;--badge-amber:#fbbf24;--badge-blue:#60a5fa;
 }
-
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;cursor:default}
 button{cursor:pointer;font-family:inherit}
 input,select,textarea{cursor:text}
-.ip-cell,.preview-box,.log-detail,.cmdlog-body{cursor:text;-webkit-user-select:text;user-select:text}
 
 /* === LOGIN === */
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh}
@@ -70,52 +60,76 @@ input,select,textarea{cursor:text}
 .btn-login{width:100%;padding:12px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;transition:background .15s;margin-top:4px}
 .btn-login:hover{background:var(--nyu-light)}
 .login-error{color:var(--red);font-size:12px;margin-bottom:10px;min-height:17px}
-.login-hint{font-size:11px;color:var(--text-dim);margin-top:20px;line-height:1.7;background:var(--accent-faint);border:1px solid var(--accent-pale);border-radius:var(--radius-sm);padding:10px 14px;text-align:left}
-.login-hint strong{color:var(--accent)}
-.login-hint code{background:var(--bg);padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:10px}
 
 /* === DASHBOARD === */
 #dash{display:none}
-
-/* === TOP BAR === */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:var(--topbar-bg);color:var(--topbar-text)}
 .topbar-left{display:flex;align-items:center;gap:12px}
-.topbar-logo{font-size:15px;font-weight:800;letter-spacing:0.5px;display:flex;align-items:center;gap:8px}
-.topbar-logo .torch{width:22px;height:22px}
-[data-theme="light"] .topbar-logo .torch{fill:#fff}
-[data-theme="dark"] .topbar-logo .torch{fill:var(--accent)}
+.burger{background:none;border:none;color:inherit;font-size:20px;padding:4px 6px;border-radius:4px;display:flex;align-items:center}
+.burger:hover{background:rgba(255,255,255,0.12)}
+.topbar-title{font-size:15px;font-weight:800;letter-spacing:0.5px}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .topbar-clock{font-family:var(--mono);font-size:12px;opacity:0.75}
 .user-pill{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;background:rgba(255,255,255,0.12);border-radius:20px;font-size:12px}
 [data-theme="dark"] .user-pill{background:rgba(255,255,255,0.06)}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
-.role-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.15);color:inherit}
-.btn-theme{padding:4px 8px;background:rgba(255,255,255,0.12);border:none;border-radius:var(--radius-sm);color:inherit;font-size:14px;transition:background .15s}
-.btn-theme:hover{background:rgba(255,255,255,0.2)}
-.btn-out{padding:5px 12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:inherit;font-size:11px;font-weight:600;transition:all .15s}
-.btn-out:hover{background:rgba(255,255,255,0.15)}
+.role-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.15)}
+.btn-theme,.btn-out{padding:5px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:inherit;font-size:11px;font-weight:600;transition:all .15s}
+.btn-theme:hover,.btn-out:hover{background:rgba(255,255,255,0.18)}
 
-/* === SECONDARY NAV === */
-.subnav{display:flex;align-items:center;justify-content:space-between;padding:8px 24px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim)}
-.subnav .sys-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:4px;animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:1}50%{opacity:.35}}
+/* === SIDEBAR MENU === */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50}
+.sidebar-overlay.open{display:block}
+.sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);border-right:1px solid var(--border);z-index:60;transition:left .25s ease;overflow-y:auto;box-shadow:var(--shadow-md)}
+.sidebar.open{left:0}
+.sidebar-head{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sidebar-head h3{font-size:14px;font-weight:700;color:var(--text-bright)}
+.sidebar-close{background:none;border:none;font-size:18px;color:var(--text-dim);padding:4px}
+.sidebar-close:hover{color:var(--text)}
+.sidebar-section{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-top:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:background .1s;border:none;background:none;width:100%;text-align:left}
+.sidebar-item:hover{background:var(--accent-faint)}
+.sidebar-item.active{background:var(--accent-pale);color:var(--accent);font-weight:700}
+.sidebar-item .icon{width:18px;text-align:center;font-size:15px;opacity:0.7}
+.sidebar-user{padding:16px 20px;border-top:1px solid var(--border);margin-top:auto}
+.sidebar-user .name{font-size:13px;font-weight:600;color:var(--text-bright)}
+.sidebar-user .role{font-size:11px;color:var(--text-dim)}
+
+/* === CONTENT AREA === */
+.content{padding:20px 24px}
+.page{display:none}
+.page.active{display:block}
 
 /* === STATS === */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:20px 24px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
-.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);transition:transform .15s}
+.stat:hover{transform:translateY(-2px)}
 .stat .label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.8px;font-weight:600}
-.stat .val{font-size:34px;font-weight:800;margin-top:6px;color:var(--accent);font-variant-numeric:tabular-nums}
+.stat .val{font-size:32px;font-weight:800;margin-top:6px;color:var(--accent);font-variant-numeric:tabular-nums}
 .stat .val.g{color:var(--green)}.stat .val.b{color:var(--blue)}.stat .val.a{color:var(--amber)}
 .stat .sub{font-size:11px;color:var(--text-dim);margin-top:4px}
 
-/* === PANELS === */
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px 14px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+/* === TECHNICIAN SHIFT CARD === */
+.shift-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:24px}
+.shift-card .avatar-lg{width:52px;height:52px;border-radius:50%;background:var(--nyu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
+[data-theme="dark"] .shift-card .avatar-lg{background:var(--accent)}
+.shift-card .info{flex:1}
+.shift-card .info h2{font-size:18px;font-weight:700;color:var(--text-bright)}
+.shift-card .info .meta{font-size:13px;color:var(--text-dim);margin-top:4px;display:flex;flex-wrap:wrap;gap:16px}
+.shift-card .info .meta span{display:inline-flex;align-items:center;gap:4px}
+.shift-card .summary{text-align:right;flex-shrink:0}
+.shift-card .summary .num{font-size:28px;font-weight:800;color:var(--accent)}
+.shift-card .summary .lbl{font-size:11px;color:var(--text-dim);text-transform:uppercase}
+.device-alert{margin-bottom:20px;padding:14px 18px;border-radius:var(--radius);font-size:13px;font-weight:600}
+.device-alert.all-good{background:var(--green-bg);color:var(--badge-green);border:1px solid var(--green-border)}
+.device-alert.has-issue{background:var(--red-bg);color:var(--badge-red);border:1px solid var(--red-border)}
+
+/* === PANELS & TABLES === */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px}
 .panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .panel-head h2{font-size:13px;font-weight:700;color:var(--text-bright)}
 .panel-head .count{font-size:11px;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px;font-weight:600}
-.tbl-wrap{overflow-x:auto;max-height:420px;overflow-y:auto}
+.tbl-wrap{overflow-x:auto;max-height:460px;overflow-y:auto}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
@@ -126,12 +140,12 @@ td strong{color:var(--text-bright);font-weight:600}
 /* === BADGES === */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:700}
 .badge::before{content:'';width:6px;height:6px;border-radius:50%}
-.badge.online,.badge.confirmed{background:var(--green-bg);color:var(--badge-text-green);border:1px solid var(--green-border)}.badge.online::before,.badge.confirmed::before{background:var(--green)}
-.badge.offline{background:var(--red-bg);color:var(--badge-text-red);border:1px solid var(--red-border)}.badge.offline::before{background:var(--red)}
-.badge.standby,.badge.pending{background:var(--amber-bg);color:var(--badge-text-amber);border:1px solid var(--amber-border)}.badge.standby::before,.badge.pending::before{background:var(--amber)}
-.badge.on-site{background:var(--blue-bg);color:var(--badge-text-blue);border:1px solid var(--blue-border)}.badge.on-site::before{background:var(--blue)}
+.badge.online,.badge.confirmed{background:var(--green-bg);color:var(--badge-green);border:1px solid var(--green-border)}.badge.online::before,.badge.confirmed::before{background:var(--green)}
+.badge.offline{background:var(--red-bg);color:var(--badge-red);border:1px solid var(--red-border)}.badge.offline::before{background:var(--red)}
+.badge.standby,.badge.pending{background:var(--amber-bg);color:var(--badge-amber);border:1px solid var(--amber-border)}.badge.standby::before,.badge.pending::before{background:var(--amber)}
+.badge.on-site{background:var(--blue-bg);color:var(--badge-blue);border:1px solid var(--blue-border)}.badge.on-site::before{background:var(--blue)}
 
-/* === ACTION BUTTONS === */
+/* === BUTTONS === */
 .btn-cmd{padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
 .btn-cmd.active{background:var(--nyu);color:#fff}
 [data-theme="dark"] .btn-cmd.active{background:var(--accent)}
@@ -145,8 +159,7 @@ td strong{color:var(--text-bright);font-weight:600}
 .modal-wrap.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:540px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .modal-top{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.modal-top h2{font-size:15px;font-weight:700;color:var(--text-bright);display:flex;align-items:center;gap:8px}
-.modal-top h2 .cmd-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.modal-top h2{font-size:15px;font-weight:700;color:var(--text-bright)}
 .modal-x{background:none;border:none;color:var(--text-dim);font-size:22px;line-height:1;padding:4px}.modal-x:hover{color:var(--text)}
 .modal-body{padding:22px}
 .mf{margin-bottom:16px}
@@ -158,31 +171,25 @@ td strong{color:var(--text-bright);font-weight:600}
 .preview-box{background:var(--log-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:var(--mono);font-size:11px;color:var(--log-accent);white-space:pre;overflow-x:auto;max-height:200px;overflow-y:auto;line-height:1.5}
 .vol-row{display:flex;align-items:center;gap:12px;margin-top:6px}
 .vol-row input[type=range]{flex:1;accent-color:var(--accent)}
-.vol-num{font-family:var(--mono);font-size:13px;color:var(--accent);min-width:36px;text-align:right;font-weight:700}
+.vol-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;min-width:36px;text-align:right}
 .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
 .btn-fire{padding:10px 24px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;transition:all .15s}
 [data-theme="dark"] .btn-fire{background:var(--accent)}
 .btn-fire:hover{opacity:.88;transform:translateY(-1px)}.btn-fire:disabled{opacity:.35;cursor:not-allowed;transform:none}
 
 /* === COMMAND LOG === */
-.cmdlog{margin:0 24px 24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
-.cmdlog-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text-bright)}
+.cmdlog-body{max-height:240px;overflow-y:auto;padding:14px 18px;background:var(--log-bg);font-family:var(--mono);font-size:11.5px}
+.log-empty{color:var(--log-dim);font-style:italic}
+.log-entry{padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer}
+.log-entry:last-child{border-bottom:none}
+.log-line{color:var(--log-text)}.log-line .ts{color:var(--log-dim)}.log-line .act{color:var(--log-accent);font-weight:700}.log-line .dev{color:#f0f0f0;font-weight:600}.log-line .hint{color:var(--log-dim);font-size:10px}
+.log-detail{display:none;margin-top:8px;padding:10px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:var(--log-accent);white-space:pre;overflow-x:auto;line-height:1.4;font-size:11px}
+.log-entry.open .log-detail{display:block}
+.log-entry.flash{animation:flashP 2s ease-out}
+@keyframes flashP{0%{background:rgba(155,93,229,0.2)}100%{background:transparent}}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:none}
 .live-dot.on{display:inline-block;animation:pulse 1s ease-in-out 3}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
-.cmdlog-body{max-height:240px;overflow-y:auto;padding:14px 18px;background:var(--log-bg);font-family:var(--mono);font-size:11.5px;position:relative}
-.log-empty{color:var(--log-dim);font-style:italic}
-.log-entry{padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;position:relative}
-.log-entry:last-child{border-bottom:none}
-.log-line{color:var(--log-text)}
-.log-line .ts{color:var(--log-dim)}
-.log-line .act{color:var(--log-accent);font-weight:700}
-.log-line .dev{color:#f0f0f0;font-weight:600}
-.log-line .hint{color:var(--log-dim);font-size:10px}
-.log-detail{display:none;margin-top:8px;padding:10px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:var(--log-accent);white-space:pre;overflow-x:auto;line-height:1.4;font-size:11px}
-.log-entry.open .log-detail{display:block}
-.log-entry.flash{animation:flashPurple 2s ease-out}
-@keyframes flashPurple{0%{background:rgba(155,93,229,0.2)}100%{background:transparent}}
 
 /* === TOAST === */
 .toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 18px;font-size:12px;font-weight:600;color:var(--green);z-index:200;transform:translateX(120%);transition:transform .3s ease;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:8px}
@@ -190,11 +197,13 @@ td strong{color:var(--text-bright);font-weight:600}
 .toast svg{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2.5}
 
 /* === RESPONSIVE === */
-@media(max-width:1080px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.stats{grid-template-columns:1fr}.subnav{display:none}.topbar{flex-wrap:wrap;gap:8px}}
+@media(max-width:1080px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.stats{grid-template-columns:1fr}.shift-card{flex-direction:column;text-align:center}.shift-card .summary{text-align:center}.shift-card .info .meta{justify-content:center}}
 </style>
 </head>
 <body>
+
+<!-- === LOGIN === -->
 <div id="login">
   <div class="login-card">
     <div class="login-brand">
@@ -209,61 +218,60 @@ td strong{color:var(--text-bright);font-weight:600}
   </div>
 </div>
 
+<!-- === DASHBOARD === -->
 <div id="dash">
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-logo">
-        <svg class="torch" viewBox="0 0 24 24"><path d="M12 2C12 2 9 6 9 9c0 1.1.3 2.1.8 3H9v1h2v7h2v-7h2v-1h-.8c.5-.9.8-1.9.8-3 0-3-3-7-3-7zm0 2.5c.8 1.3 1.5 3 1.5 4.5 0 .8-.3 1.6-.7 2.2-.2.2-.5.5-.8.6-.3-.1-.6-.4-.8-.6-.4-.6-.7-1.4-.7-2.2 0-1.5.7-3.2 1.5-4.5z"/></svg>
-        NYU AV Command Center
-      </div>
+      <button class="burger" id="burger-btn">&#9776;</button>
+      <div class="topbar-title">NYU AV Command Center</div>
     </div>
     <div class="topbar-right">
       <div class="topbar-clock" id="clock"></div>
-      <div class="user-pill">
-        <div class="user-avatar" id="u-avatar"></div>
-        <span id="u-name"></span>
-        <span class="role-tag" id="u-role"></span>
-      </div>
-      <button class="btn-theme" id="btn-theme" title="Toggle theme">🌙</button>
+      <div class="user-pill"><div class="user-avatar" id="u-avatar"></div><span id="u-name"></span><span class="role-tag" id="u-role"></span></div>
+      <button class="btn-theme" id="btn-theme">&#9789;</button>
       <button class="btn-out" id="btn-out">Logout</button>
     </div>
   </div>
-  <div class="subnav">
-    <span><span class="sys-dot"></span> System Online — Network 10.18.x.x — <span id="sys-eq"></span></span>
-    <span id="sys-time"></span>
-  </div>
 
-  <div class="stats">
-    <div class="stat"><div class="label">Total Equipment</div><div class="val" id="s-total">0</div><div class="sub">Across 8 buildings</div></div>
-    <div class="stat"><div class="label">Online Devices</div><div class="val g" id="s-online">0</div><div class="sub" id="s-online-sub"></div></div>
-    <div class="stat"><div class="label">Active Staff Today</div><div class="val b" id="s-staff">0</div><div class="sub" id="s-staff-sub"></div></div>
-    <div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">0</div><div class="sub">This session</div></div>
-  </div>
+  <!-- Sidebar -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-head"><h3>Menu</h3><button class="sidebar-close" id="sidebar-close">&times;</button></div>
+    <div id="sidebar-menu"></div>
+    <div class="sidebar-user"><div class="name" id="sb-name"></div><div class="role" id="sb-role"></div></div>
+  </nav>
 
-  <div class="grid">
-    <div class="panel"><div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count" id="eq-count"></div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead><tbody id="eq-tb"></tbody></table></div></div>
-    <div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count" id="st-count"></div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="st-tb"></tbody></table></div></div>
-  </div>
-
-  <div class="cmdlog">
-    <div class="cmdlog-head"><div class="live-dot" id="live-dot"></div> Command Log</div>
-    <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands…</div></div>
+  <!-- Content -->
+  <div class="content">
+    <!-- TECHNICIAN: My Dashboard -->
+    <div class="page" id="page-tech-dash"></div>
+    <!-- TECHNICIAN: Staff On Shift -->
+    <div class="page" id="page-tech-staff"></div>
+    <!-- TECHNICIAN: All Equipment (read-only) -->
+    <div class="page" id="page-tech-equip"></div>
+    <!-- MANAGER: Dashboard -->
+    <div class="page" id="page-mgr-dash"></div>
+    <!-- MANAGER: Staff Schedule -->
+    <div class="page" id="page-mgr-staff"></div>
+    <!-- MANAGER: Command Log -->
+    <div class="page" id="page-mgr-log"></div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- === MODAL === -->
 <div class="modal-wrap" id="modal-wrap">
   <div class="modal">
-    <div class="modal-top"><h2><span class="cmd-dot"></span> Command Builder</h2><button class="modal-x" id="modal-x">&times;</button></div>
+    <div class="modal-top"><h2>Command Builder</h2><button class="modal-x" id="modal-x">&times;</button></div>
     <div class="modal-body">
       <div class="mf"><div class="mf-label">Target Device</div><div class="mf-value" id="m-dev"></div></div>
       <div class="mf"><div class="mf-label">IP Address</div><div class="mf-value ip-cell" id="m-ip"></div></div>
-      <div class="offline-warn" id="m-warn">⚠ Device is currently Offline — command will be queued.</div>
+      <div class="offline-warn" id="m-warn">Device is currently Offline — command will be queued.</div>
       <div class="mf"><div class="mf-label">Command</div><select id="m-cmd"><option value="power_on">power_on</option><option value="power_off">power_off</option><option value="reboot">reboot</option><option value="mute_audio">mute_audio</option><option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option><option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option></select></div>
       <div class="mf" id="vol-grp" style="display:none"><div class="mf-label">Volume Level</div><div class="vol-row"><input type="range" id="m-vol" min="0" max="100" value="50"><div class="vol-num"><span id="vol-v">50</span>%</div></div></div>
       <div class="mf"><div class="mf-label">Payload Preview</div><div class="preview-box" id="m-preview"></div></div>
     </div>
-    <div class="modal-foot"><button class="btn-fire" id="btn-fire">⚡ Fire Command</button></div>
+    <div class="modal-foot"><button class="btn-fire" id="btn-fire">Fire Command</button></div>
   </div>
 </div>
 <div class="toast" id="toast"><svg viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
@@ -274,26 +282,24 @@ td strong{color:var(--text-bright);font-weight:600}
 // ============================================================================
 
 // === AUTHENTICATION — Demo only (NOT for production) ===
-// Production: NYU SSO (Shibboleth/SAML) via backend auth service
 const CREDS = [
   { username: "technician", password: "tech123", role: "technician", name: "Alex Rivera" },
   { username: "manager",    password: "mgr456",  role: "manager",    name: "Jordan Lee" }
 ];
-let session = null, pendingCount = 0, activeEqId = null;
+let session = null, pendingCount = 0, activeEqId = null, currentPage = null;
 
 // === Spreadsheet A: AV Equipment Inventory | Source: data/equipment-inventory.csv ===
-// Production: Google Sheets API with Redis caching layer
 const EQUIPMENT = [
-  { id:"EQ-001", device_name:"Crestron DM-NVX-350",     device_type:"Video Switcher",    building:"Bobst Library",               room:"LL1-03", floor:"LL1", ip_address:"10.18.4.101", status:"Online",  last_ping:"2026-06-18 09:42:11", assigned_tech:"Alex Rivera" },
-  { id:"EQ-002", device_name:"Biamp Tesira SERVER-IO",   device_type:"DSP",               building:"Kimmel Center",               room:"802",    floor:"8",   ip_address:"10.18.6.55",  status:"Online",  last_ping:"2026-06-18 09:41:58", assigned_tech:"Sam Patel" },
-  { id:"EQ-003", device_name:"Epson Pro L1755U",         device_type:"Projector",         building:"Stern School of Business",    room:"310",    floor:"3",   ip_address:"10.18.8.22",  status:"Standby", last_ping:"2026-06-18 08:15:30", assigned_tech:"Jordan Lee" },
-  { id:"EQ-004", device_name:"QSC Q-SYS Core 110f",     device_type:"DSP",               building:"Tandon School of Engineering",room:"LC-400", floor:"4",   ip_address:"10.19.2.10",  status:"Online",  last_ping:"2026-06-18 09:43:01", assigned_tech:"Alex Rivera" },
-  { id:"EQ-005", device_name:"Extron SW4 HD 4K PLUS",   device_type:"Video Switcher",    building:"Silver Center",               room:"503",    floor:"5",   ip_address:"10.18.3.88",  status:"Offline", last_ping:"2026-06-17 22:10:44", assigned_tech:"Priya Nair" },
-  { id:"EQ-006", device_name:"Samsung QM85R-B",          device_type:"Display",           building:"Courant Institute",           room:"109",    floor:"1",   ip_address:"10.18.5.130", status:"Online",  last_ping:"2026-06-18 09:40:05", assigned_tech:"Sam Patel" },
-  { id:"EQ-007", device_name:"Shure MXA920 Ceiling Mic", device_type:"Microphone System", building:"Tisch School of the Arts",    room:"B-50",   floor:"B",   ip_address:"10.18.7.201", status:"Online",  last_ping:"2026-06-18 09:42:47", assigned_tech:"Casey Lin" },
-  { id:"EQ-008", device_name:"Christie DWU850-GS",       device_type:"Projector",         building:"Palladium Athletic Facility", room:"Gym-A",  floor:"1",   ip_address:"10.18.9.15",  status:"Standby", last_ping:"2026-06-18 07:55:00", assigned_tech:"Jordan Lee" },
-  { id:"EQ-009", device_name:"Sennheiser TeamConnect",   device_type:"Microphone System", building:"Bobst Library",               room:"619",    floor:"6",   ip_address:"10.18.4.175", status:"Online",  last_ping:"2026-06-18 09:43:12", assigned_tech:"Priya Nair" },
-  { id:"EQ-010", device_name:"LG LSAB012-M4 LED Wall",  device_type:"Display",           building:"Kimmel Center",               room:"Lobby",  floor:"1",   ip_address:"10.18.6.240", status:"Offline", last_ping:"2026-06-16 18:30:22", assigned_tech:"Casey Lin" }
+  { id:"EQ-001", device_name:"Crestron DM-NVX-350",     device_type:"Video Switcher",    building:"Bobst Library",               room:"LL1-03", ip_address:"10.18.4.101", status:"Online",  assigned_tech:"Alex Rivera" },
+  { id:"EQ-002", device_name:"Biamp Tesira SERVER-IO",   device_type:"DSP",               building:"Kimmel Center",               room:"802",    ip_address:"10.18.6.55",  status:"Online",  assigned_tech:"Sam Patel" },
+  { id:"EQ-003", device_name:"Epson Pro L1755U",         device_type:"Projector",         building:"Stern School of Business",    room:"310",    ip_address:"10.18.8.22",  status:"Standby", assigned_tech:"Jordan Lee" },
+  { id:"EQ-004", device_name:"QSC Q-SYS Core 110f",     device_type:"DSP",               building:"Tandon School of Engineering",room:"LC-400", ip_address:"10.19.2.10",  status:"Online",  assigned_tech:"Alex Rivera" },
+  { id:"EQ-005", device_name:"Extron SW4 HD 4K PLUS",   device_type:"Video Switcher",    building:"Silver Center",               room:"503",    ip_address:"10.18.3.88",  status:"Offline", assigned_tech:"Priya Nair" },
+  { id:"EQ-006", device_name:"Samsung QM85R-B",          device_type:"Display",           building:"Courant Institute",           room:"109",    ip_address:"10.18.5.130", status:"Online",  assigned_tech:"Sam Patel" },
+  { id:"EQ-007", device_name:"Shure MXA920 Ceiling Mic", device_type:"Microphone System", building:"Tisch School of the Arts",    room:"B-50",   ip_address:"10.18.7.201", status:"Online",  assigned_tech:"Casey Lin" },
+  { id:"EQ-008", device_name:"Christie DWU850-GS",       device_type:"Projector",         building:"Palladium Athletic Facility", room:"Gym-A",  ip_address:"10.18.9.15",  status:"Standby", assigned_tech:"Jordan Lee" },
+  { id:"EQ-009", device_name:"Sennheiser TeamConnect",   device_type:"Microphone System", building:"Bobst Library",               room:"619",    ip_address:"10.18.4.175", status:"Online",  assigned_tech:"Priya Nair" },
+  { id:"EQ-010", device_name:"LG LSAB012-M4 LED Wall",  device_type:"Display",           building:"Kimmel Center",               room:"Lobby",  ip_address:"10.18.6.240", status:"Offline", assigned_tech:"Casey Lin" }
 ];
 
 // === Spreadsheet B: Staff Shift Schedules | Source: data/staff-schedules.csv ===
@@ -312,15 +318,13 @@ const STAFF = [
 const $ = id => document.getElementById(id);
 const dom = {
   login:$('login'), dash:$('dash'), inUser:$('in-user'), inPass:$('in-pass'), loginErr:$('login-err'),
-  btnLogin:$('btn-login'), btnOut:$('btn-out'), btnTheme:$('btn-theme'),
-  uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'), clock:$('clock'), sysTime:$('sys-time'), sysEq:$('sys-eq'),
-  sTotal:$('s-total'), sOnline:$('s-online'), sOnlineSub:$('s-online-sub'),
-  sStaff:$('s-staff'), sStaffSub:$('s-staff-sub'), sPending:$('s-pending'),
-  eqTb:$('eq-tb'), stTb:$('st-tb'), eqCount:$('eq-count'), stCount:$('st-count'),
+  btnLogin:$('btn-login'), btnOut:$('btn-out'), btnTheme:$('btn-theme'), clock:$('clock'),
+  uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'),
+  burgerBtn:$('burger-btn'), sidebar:$('sidebar'), sidebarOverlay:$('sidebar-overlay'),
+  sidebarClose:$('sidebar-close'), sidebarMenu:$('sidebar-menu'), sbName:$('sb-name'), sbRole:$('sb-role'),
   modalWrap:$('modal-wrap'), modalX:$('modal-x'), mDev:$('m-dev'), mIp:$('m-ip'),
   mWarn:$('m-warn'), mCmd:$('m-cmd'), volGrp:$('vol-grp'), mVol:$('m-vol'), volV:$('vol-v'),
-  mPreview:$('m-preview'), btnFire:$('btn-fire'),
-  logBody:$('log-body'), liveDot:$('live-dot'), toast:$('toast'), toastMsg:$('toast-msg')
+  mPreview:$('m-preview'), btnFire:$('btn-fire'), toast:$('toast'), toastMsg:$('toast-msg')
 };
 
 // === HELPERS ===
@@ -329,18 +333,47 @@ const fmtTime = () => { const d=new Date(); return `${pad(d.getHours())}:${pad(d
 const fmtDate = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const fmtFull = () => `${fmtDate()} ${fmtTime()}`;
 const isoNow = () => new Date().toISOString();
+const badgeHtml = s => `<span class="badge ${s.toLowerCase().replace(' ','-')}">${s}</span>`;
+setInterval(() => { dom.clock.textContent = fmtTime(); }, 1000);
 
-// === THEME TOGGLE ===
-function toggleTheme() {
-  const html = document.documentElement;
-  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  html.setAttribute('data-theme', next);
-  dom.btnTheme.textContent = next === 'light' ? '🌙' : '☀️';
+// === SIDEBAR ===
+function openSidebar() { dom.sidebar.classList.add('open'); dom.sidebarOverlay.classList.add('open'); }
+function closeSidebar() { dom.sidebar.classList.remove('open'); dom.sidebarOverlay.classList.remove('open'); }
+
+// === NAV — build menu items per role, switch pages ===
+const MENUS = {
+  technician: [
+    { id: 'page-tech-dash',  label: 'My Dashboard',   icon: '&#9673;' },
+    { id: 'page-tech-staff', label: 'Staff On Shift',  icon: '&#9823;' },
+    { id: 'page-tech-equip', label: 'All Equipment',   icon: '&#9881;' }
+  ],
+  manager: [
+    { id: 'page-mgr-dash',  label: 'Dashboard',       icon: '&#9673;' },
+    { id: 'page-mgr-staff', label: 'Staff Schedule',   icon: '&#9823;' },
+    { id: 'page-mgr-log',   label: 'Command Log',      icon: '&#9783;' }
+  ]
+};
+
+function buildSidebar() {
+  const items = MENUS[session.role];
+  dom.sidebarMenu.innerHTML =
+    '<div class="sidebar-section">Navigation</div>' +
+    items.map(m =>
+      `<button class="sidebar-item" data-page="${m.id}"><span class="icon">${m.icon}</span>${m.label}</button>`
+    ).join('');
+  dom.sidebarMenu.querySelectorAll('.sidebar-item').forEach(btn => {
+    btn.addEventListener('click', () => { navigateTo(btn.dataset.page); closeSidebar(); });
+  });
+  dom.sbName.textContent = session.name;
+  dom.sbRole.textContent = session.role === 'manager' ? 'Manager' : 'Technician';
 }
 
-// === CLOCK ===
-const tick = () => { dom.clock.textContent = fmtTime(); dom.sysTime.textContent = fmtFull(); };
-setInterval(tick, 1000); tick();
+function navigateTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $(pageId).classList.add('active');
+  dom.sidebarMenu.querySelectorAll('.sidebar-item').forEach(b => b.classList.toggle('active', b.dataset.page === pageId));
+  currentPage = pageId;
+}
 
 // === AUTH ===
 function doLogin() {
@@ -353,58 +386,119 @@ function doLogout() {
   session = null; pendingCount = 0;
   dom.login.style.display = 'flex'; dom.dash.style.display = 'none';
   dom.inUser.value = ''; dom.inPass.value = '';
-  dom.logBody.innerHTML = '<div class="log-empty">Awaiting dispatched commands…</div>';
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.innerHTML = ''; });
 }
 
-// === DASHBOARD ===
+// === INIT DASHBOARD ===
 function initDash() {
   dom.login.style.display = 'none'; dom.dash.style.display = 'block';
   dom.uName.textContent = session.name;
   dom.uRole.textContent = session.role;
-  dom.uRole.className = 'role-tag ' + session.role;
   dom.uAvatar.textContent = session.name.split(' ').map(w => w[0]).join('');
-  dom.uAvatar.className = 'user-avatar ' + session.role;
-  renderStats(); renderEquipment(); renderStaff();
+  buildSidebar();
+  if (session.role === 'technician') { renderTechDash(); renderTechStaff(); renderTechEquip(); navigateTo('page-tech-dash'); }
+  else { renderMgrDash(); renderMgrStaff(); renderMgrLog(); navigateTo('page-mgr-dash'); }
 }
-function renderStats() {
+
+// === TECHNICIAN VIEWS ===
+function renderTechDash() {
+  const myShift = STAFF.find(s => s.staff_name === session.name);
+  const myDevices = EQUIPMENT.filter(e => e.assigned_tech === session.name);
+  const offlineCount = myDevices.filter(d => d.status === 'Offline').length;
+  const page = $('page-tech-dash');
+
+  let shiftHtml = '';
+  if (myShift) {
+    shiftHtml = `<div class="shift-card">
+      <div class="avatar-lg">${session.name.split(' ').map(w=>w[0]).join('')}</div>
+      <div class="info">
+        <h2>${session.name}</h2>
+        <div class="meta">
+          <span>${myShift.role}</span>
+          <span>${myShift.shift_start} – ${myShift.shift_end}</span>
+          <span>${myShift.location}</span>
+          <span>${badgeHtml(myShift.status)}</span>
+        </div>
+      </div>
+      <div class="summary"><div class="num">${myDevices.length}</div><div class="lbl">Devices Assigned</div></div>
+    </div>`;
+  }
+
+  const alertHtml = offlineCount === 0
+    ? `<div class="device-alert all-good">All ${myDevices.length} assigned devices are online.</div>`
+    : `<div class="device-alert has-issue">${offlineCount} device${offlineCount > 1 ? 's' : ''} offline — needs attention.</div>`;
+
+  const tableHtml = `<div class="panel">
+    <div class="panel-head"><h2>Your Assigned Devices</h2><div class="count">${myDevices.length} devices</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th></tr></thead>
+    <tbody>${myDevices.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  page.innerHTML = shiftHtml + alertHtml + tableHtml;
+}
+
+function renderTechStaff() {
+  const today = fmtDate();
+  const todayStaff = STAFF.filter(s => s.shift_date === today);
+  const page = $('page-tech-staff');
+  page.innerHTML = `<div class="panel">
+    <div class="panel-head"><h2>Staff On Shift Today</h2><div class="count">${todayStaff.length} staff</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
+    <tbody>${todayStaff.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function renderTechEquip() {
+  const page = $('page-tech-equip');
+  page.innerHTML = `<div class="panel">
+    <div class="panel-head"><h2>All Equipment (Read-Only)</h2><div class="count">${EQUIPMENT.length} devices</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Assigned To</th></tr></thead>
+    <tbody>${EQUIPMENT.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td>${eq.assigned_tech}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+// === MANAGER VIEWS ===
+function renderMgrDash() {
   const online = EQUIPMENT.filter(e => e.status === 'Online').length;
   const offline = EQUIPMENT.filter(e => e.status === 'Offline').length;
   const today = fmtDate();
-  const active = STAFF.filter(s => s.shift_date === today && s.status !== 'Pending').length;
-  const onSite = STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length;
-  dom.sTotal.textContent = EQUIPMENT.length;
-  dom.sOnline.textContent = online;
-  dom.sOnlineSub.textContent = `${offline} offline · ${EQUIPMENT.length - online - offline} standby`;
-  dom.sStaff.textContent = active;
-  dom.sStaffSub.textContent = `${onSite} on-site now`;
-  dom.sPending.textContent = pendingCount;
-  dom.sysEq.textContent = `Devices: ${online}/${EQUIPMENT.length} online`;
-}
-function renderEquipment() {
-  dom.eqCount.textContent = `${EQUIPMENT.length} devices`;
-  dom.eqTb.innerHTML = EQUIPMENT.map(eq => {
-    const sc = eq.status.toLowerCase();
-    // RBAC: technician sees locked button; manager gets active button
-    const btn = session.role === 'manager'
-      ? `<button class="btn-cmd active" data-id="${eq.id}">⚡ Command</button>`
-      : `<button class="btn-cmd locked">🔒 Command</button>`;
-    return `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td><span class="badge ${sc}">${eq.status}</span></td><td>${btn}</td></tr>`;
-  }).join('');
-  dom.eqTb.querySelectorAll('.btn-cmd.active').forEach(b =>
-    b.addEventListener('click', () => openModal(b.dataset.id))
-  );
-}
-function renderStaff() {
-  dom.stCount.textContent = `${STAFF.length} entries`;
-  dom.stTb.innerHTML = STAFF.map(s => {
-    const sc = s.status.toLowerCase().replace(' ','-');
-    return `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td><span class="badge ${sc}">${s.status}</span></td></tr>`;
-  }).join('');
+  const activeStaff = STAFF.filter(s => s.shift_date === today && s.status !== 'Pending').length;
+  const page = $('page-mgr-dash');
+
+  const statsHtml = `<div class="stats">
+    <div class="stat"><div class="label">Total Equipment</div><div class="val">${EQUIPMENT.length}</div><div class="sub">Across 8 buildings</div></div>
+    <div class="stat"><div class="label">Online Devices</div><div class="val g">${online}</div><div class="sub">${offline} offline, ${EQUIPMENT.length - online - offline} standby</div></div>
+    <div class="stat"><div class="label">Active Staff</div><div class="val b">${activeStaff}</div><div class="sub">${STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length} on-site now</div></div>
+    <div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">${pendingCount}</div><div class="sub">This session</div></div>
+  </div>`;
+
+  const tableHtml = `<div class="panel">
+    <div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count">${EQUIPMENT.length} devices</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="mgr-eq-tb">${EQUIPMENT.map(eq => {
+      const sc = eq.status.toLowerCase();
+      return `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td><button class="btn-cmd active" data-id="${eq.id}">Command</button></td></tr>`;
+    }).join('')}</tbody></table></div></div>`;
+
+  page.innerHTML = statsHtml + tableHtml;
+  page.querySelectorAll('.btn-cmd.active').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
 }
 
-// === MODAL ===
+function renderMgrStaff() {
+  const page = $('page-mgr-staff');
+  page.innerHTML = `<div class="panel">
+    <div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
+    <tbody>${STAFF.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_date}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function renderMgrLog() {
+  const page = $('page-mgr-log');
+  page.innerHTML = `<div class="panel">
+    <div class="panel-head"><h2>Command Log</h2><div style="display:flex;align-items:center;gap:8px"><div class="live-dot" id="live-dot"></div><div class="count" id="log-count">0 commands</div></div></div>
+    <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands...</div></div></div>`;
+}
+
+// === COMMAND MODAL ===
 function openModal(eqId) {
-  // RBAC: role check — technician role blocked from command dispatch
+  // RBAC: role check — technician blocked from command dispatch
   if (!session || session.role !== 'manager') return;
   const dev = EQUIPMENT.find(e => e.id === eqId);
   if (!dev) return;
@@ -423,13 +517,9 @@ function buildPayload() {
   if (!dev) return {};
   const cmd = dom.mCmd.value;
   const params = cmd === 'set_volume' ? { level: parseInt(dom.mVol.value,10), unit: "percent" } : {};
-  return {
-    api_version: "1.0", timestamp: isoNow(),
-    issued_by: { user: session.username, role: "manager" },
-    target_device: { device_id: dev.id, device_name: dev.device_name, device_type: dev.device_type,
-      ip_address: dev.ip_address, location: { building: dev.building, room: dev.room } },
-    command: { action: cmd, parameters: params }, status: "dispatched"
-  };
+  return { api_version:"1.0", timestamp:isoNow(), issued_by:{ user:session.username, role:"manager" },
+    target_device:{ device_id:dev.id, device_name:dev.device_name, device_type:dev.device_type, ip_address:dev.ip_address, location:{ building:dev.building, room:dev.room } },
+    command:{ action:cmd, parameters:params }, status:"dispatched" };
 }
 function updatePreview() { dom.mPreview.textContent = JSON.stringify(buildPayload(), null, 2); }
 function fireCommand() {
@@ -440,7 +530,8 @@ function fireCommand() {
   const dev = EQUIPMENT.find(e => e.id === activeEqId);
   dom.btnFire.disabled = true;
   setTimeout(() => { dom.btnFire.disabled = false; }, 1000);
-  pendingCount++; dom.sPending.textContent = pendingCount;
+  pendingCount++;
+  const sp = $('s-pending'); if (sp) sp.textContent = pendingCount;
   appendLog(dev, payload);
   showToast(`Command dispatched → ${dev.device_name}`);
   closeModal();
@@ -448,32 +539,37 @@ function fireCommand() {
 
 // === COMMAND LOG ===
 function appendLog(dev, payload) {
-  const empty = dom.logBody.querySelector('.log-empty');
+  // Navigate to log page if not there
+  if (currentPage !== 'page-mgr-log') navigateTo('page-mgr-log');
+  const logBody = $('log-body');
+  const logCount = $('log-count');
+  const liveDot = $('live-dot');
+  const empty = logBody.querySelector('.log-empty');
   if (empty) empty.remove();
   const el = document.createElement('div');
   el.className = 'log-entry flash';
   el.innerHTML = `<div class="log-line"><span class="ts">[${fmtFull()}]</span> <span class="act">DISPATCHED</span> → <span class="dev">${dev.device_name}</span> @ ${dev.ip_address} — ${payload.command.action} <span class="hint">(click to expand)</span></div><div class="log-detail">${JSON.stringify(payload, null, 2)}</div>`;
   el.addEventListener('click', () => el.classList.toggle('open'));
-  dom.logBody.prepend(el); dom.logBody.scrollTop = 0;
-  dom.liveDot.classList.remove('on'); void dom.liveDot.offsetWidth; dom.liveDot.classList.add('on');
+  logBody.prepend(el); logBody.scrollTop = 0;
+  if (logCount) logCount.textContent = `${pendingCount} command${pendingCount !== 1 ? 's' : ''}`;
+  if (liveDot) { liveDot.classList.remove('on'); void liveDot.offsetWidth; liveDot.classList.add('on'); }
 }
-function showToast(msg) {
-  dom.toastMsg.textContent = msg; dom.toast.classList.add('show');
-  setTimeout(() => dom.toast.classList.remove('show'), 2500);
-}
+function showToast(msg) { dom.toastMsg.textContent = msg; dom.toast.classList.add('show'); setTimeout(() => dom.toast.classList.remove('show'), 2500); }
+function toggleTheme() { const h=document.documentElement; const n=h.getAttribute('data-theme')==='light'?'dark':'light'; h.setAttribute('data-theme',n); dom.btnTheme.innerHTML=n==='light'?'&#9789;':'&#9788;'; }
 
-// === EVENT LISTENERS (addEventListener only — no inline handlers) ===
+// === EVENT LISTENERS ===
 dom.btnLogin.addEventListener('click', doLogin);
 dom.inPass.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 dom.inUser.addEventListener('keydown', e => { if (e.key === 'Enter') dom.inPass.focus(); });
 dom.btnOut.addEventListener('click', doLogout);
 dom.btnTheme.addEventListener('click', toggleTheme);
+dom.burgerBtn.addEventListener('click', openSidebar);
+dom.sidebarClose.addEventListener('click', closeSidebar);
+dom.sidebarOverlay.addEventListener('click', closeSidebar);
 dom.modalX.addEventListener('click', closeModal);
 dom.modalWrap.addEventListener('click', e => { if (e.target === dom.modalWrap) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-dom.mCmd.addEventListener('change', () => {
-  dom.volGrp.style.display = dom.mCmd.value === 'set_volume' ? 'block' : 'none'; updatePreview();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeSidebar(); } });
+dom.mCmd.addEventListener('change', () => { dom.volGrp.style.display = dom.mCmd.value === 'set_volume' ? 'block' : 'none'; updatePreview(); });
 dom.mVol.addEventListener('input', () => { dom.volV.textContent = dom.mVol.value; updatePreview(); });
 dom.btnFire.addEventListener('click', fireCommand);
 </script>
