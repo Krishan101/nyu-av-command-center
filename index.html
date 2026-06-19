@@ -50,8 +50,10 @@
 }
 
 html{font-size:14px}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;cursor:default}
 button{cursor:pointer;font-family:inherit}
+input,select,textarea{cursor:text}
+.ip-cell,.preview-box,.log-detail,.cmdlog-body{cursor:text;-webkit-user-select:text;user-select:text}
 
 /* === LOGIN === */
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh}
