@@ -140,7 +140,10 @@ button{cursor:pointer;font-family:inherit}input,select{cursor:text}
 .tbl-wrap{overflow-x:auto;max-height:460px;overflow-y:auto}
 .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 table{width:100%;border-collapse:collapse}
-th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2;cursor:pointer;user-select:none;transition:color .15s}
+th:hover{color:var(--text-bright)}
+th .sort-arrow{margin-left:4px;font-size:8px;opacity:0.4}
+th.sorted .sort-arrow{opacity:1;color:var(--accent)}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr.data-row:hover td{background:var(--accent-faint);cursor:pointer}
@@ -377,6 +380,48 @@ function attachSearch(inputId, tableId) {
   });
 }
 
+// === SORTABLE COLUMNS ===
+function makeSortable(tableEl) {
+  if (!tableEl) return;
+  const thead = tableEl.querySelector('thead');
+  if (!thead) return;
+  const ths = thead.querySelectorAll('th');
+  ths.forEach((th, colIdx) => {
+    // Skip Action columns
+    if (th.textContent.trim().toLowerCase() === 'action') return;
+    th.innerHTML = th.textContent.trim() + '<span class="sort-arrow">&#9650;</span>';
+    th.dataset.sortDir = '';
+    th.setAttribute('aria-label', th.textContent.trim() + ', click to sort');
+    th.addEventListener('click', () => {
+      const tbody = tableEl.querySelector('tbody');
+      if (!tbody) return;
+      const rows = Array.from(tbody.querySelectorAll('tr.data-row'));
+      if (rows.length === 0) return;
+      // Toggle direction
+      const dir = th.dataset.sortDir === 'asc' ? 'desc' : 'asc';
+      // Reset all headers in this table
+      ths.forEach(h => { h.classList.remove('sorted'); h.dataset.sortDir = ''; const a = h.querySelector('.sort-arrow'); if (a) a.innerHTML = '&#9650;'; });
+      th.dataset.sortDir = dir;
+      th.classList.add('sorted');
+      th.querySelector('.sort-arrow').innerHTML = dir === 'asc' ? '&#9650;' : '&#9660;';
+      // Sort rows
+      rows.sort((a, b) => {
+        const aText = a.children[colIdx] ? a.children[colIdx].textContent.trim().toLowerCase() : '';
+        const bText = b.children[colIdx] ? b.children[colIdx].textContent.trim().toLowerCase() : '';
+        if (aText < bText) return dir === 'asc' ? -1 : 1;
+        if (aText > bText) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      // Re-append in sorted order, keeping detail rows attached
+      rows.forEach(row => {
+        tbody.appendChild(row);
+        const next = row.nextElementSibling;
+        if (next && next.classList.contains('detail-row')) tbody.appendChild(next);
+      });
+    });
+  });
+}
+
 // === DEVICE DETAIL TOGGLE ===
 function toggleDetail(rowEl, eq) {
   const next = rowEl.nextElementSibling;
@@ -447,16 +492,19 @@ function renderTechDash() {
   h += `<div class="panel"><div class="panel-head"><h2>Your Assigned Devices</h2><div class="count">${myDevices.length} devices</div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th></tr></thead><tbody id="tech-my-tb">${myDevices.map(eq => `<tr class="data-row" data-eqid="${eq.id}"><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
   page.innerHTML = h;
   page.querySelectorAll('.data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
+  makeSortable($('tech-my-tb').closest('table'));
 }
 function renderTechStaff() {
   const today = fmtDate(); const todayStaff = STAFF.filter(s => s.shift_date === today);
   $('page-tech-staff').innerHTML = `<div class="search-bar"><input class="search-input" id="search-tstaff" placeholder="Search by name, role, location..." aria-label="Filter staff"></div><div class="panel"><div class="panel-head"><h2>Staff On Shift Today</h2><div class="count">${todayStaff.length} staff</div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="tstaff-tb">${todayStaff.map(s => `<tr class="data-row"><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
   attachSearch('search-tstaff', 'tstaff-tb');
+  makeSortable($('tstaff-tb').closest('table'));
 }
 function renderTechEquip() {
   $('page-tech-equip').innerHTML = `<div class="search-bar"><input class="search-input" id="search-teq" placeholder="Search by device, type, building, IP..." aria-label="Filter equipment"></div><div class="panel"><div class="panel-head"><h2>All Equipment (Read-Only)</h2><div class="count">${EQUIPMENT.length} devices</div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Assigned To</th></tr></thead><tbody id="teq-tb">${EQUIPMENT.map(eq => `<tr class="data-row" data-eqid="${eq.id}"><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td>${eq.assigned_tech}</td></tr>`).join('')}</tbody></table></div></div>`;
   attachSearch('search-teq', 'teq-tb');
   $('teq-tb').querySelectorAll('.data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
+  makeSortable($('teq-tb').closest('table'));
 }
 
 // === MANAGER VIEWS ===
@@ -470,10 +518,12 @@ function renderMgrDash() {
   page.querySelectorAll('.btn-cmd.active').forEach(b => { b.addEventListener('click', ev => { ev.stopPropagation(); openModal(b.dataset.id); }); });
   page.querySelectorAll('#meq-tb .data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
   const exportBtn = $('btn-export'); if (exportBtn) exportBtn.addEventListener('click', exportLogCSV);
+  page.querySelectorAll('table').forEach(t => makeSortable(t));
 }
 function renderMgrStaff() {
   $('page-mgr-staff').innerHTML = `<div class="search-bar"><input class="search-input" id="search-mstaff" placeholder="Search by name, role, location..." aria-label="Filter staff"></div><div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="mstaff-tb">${STAFF.map(s => `<tr class="data-row"><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_date}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
   attachSearch('search-mstaff', 'mstaff-tb');
+  makeSortable($('mstaff-tb').closest('table'));
 }
 function renderMgrLog() {
   $('page-mgr-log').innerHTML = `<div class="panel"><div class="panel-head"><h2>Command Log (Full View)</h2><div style="display:flex;align-items:center;gap:8px"><div class="count" id="log-count2">${commandLog.length} commands</div><div class="actions"><button class="btn-sm" id="btn-export2">Export CSV</button></div></div></div><div class="cmdlog-body" id="log-body2">${commandLog.length === 0 ? '<div class="log-empty">No commands dispatched.</div>' : commandLog.map(l => logEntryHtml(l)).join('')}</div></div>`;
