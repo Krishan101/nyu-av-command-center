@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* === NYU AV Command Center — Apps Script Web App Styles === */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--nyu:#57068C;--nyu-light:#7B2FBF;--bg:#f7f7f8;--surface:#fff;--border:#e5e5e5;--text:#1a1a2e;--dim:#6b7280;--green:#16a34a;--red:#dc2626;--amber:#d97706;--blue:#2563eb;--mono:SFMono-Regular,Consolas,monospace;--radius:8px}
+body{font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+
+/* Topbar */
+.topbar{background:var(--nyu);color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar h1{font-size:16px;font-weight:800;letter-spacing:0.5px}
+.topbar .user{font-size:12px;opacity:0.9}
+.topbar .role-tag{background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;text-transform:uppercase;margin-left:6px}
+
+/* Loading */
+#loading{text-align:center;padding:80px 20px;color:var(--dim)}
+#loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--nyu);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Content */
+.content{max-width:1200px;margin:0 auto;padding:20px 24px}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.stat .label{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:0.5px;font-weight:600}
+.stat .val{font-size:28px;font-weight:800;margin-top:4px;color:var(--nyu)}
+.stat .val.green{color:var(--green)}.stat .val.red{color:var(--red)}.stat .val.blue{color:var(--blue)}.stat .val.amber{color:var(--amber)}
+
+/* Panels */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;justify-content:space-between}
+.panel-head .badge{font-size:11px;color:var(--dim);background:var(--bg);padding:2px 10px;border-radius:12px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--dim);background:#fafafa;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12.5px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f9f5fd}
+td strong{font-weight:600}
+
+/* Status badges */
+.status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;font-size:10.5px;font-weight:700}
+.status::before{content:'';width:5px;height:5px;border-radius:50%}
+.status.Online{background:#dcfce7;color:#15803d}.status.Online::before{background:#16a34a}
+.status.Offline{background:#fee2e2;color:#dc2626}.status.Offline::before{background:#dc2626}
+.status.Standby{background:#fef3c7;color:#b45309}.status.Standby::before{background:#d97706}
+
+/* Staff chips */
+.staff-chips{display:flex;flex-wrap:wrap;gap:4px}
+.staff-chip{font-size:10px;padding:2px 7px;border-radius:4px;background:#f0e6f6;color:var(--nyu);font-weight:600}
+.no-staff{font-size:11px;color:var(--dim);font-style:italic}
+
+/* Command button */
+.btn-cmd{padding:5px 12px;border:none;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer}
+.btn-cmd.active{background:var(--nyu);color:#fff}.btn-cmd.active:hover{background:var(--nyu-light)}
+.btn-cmd.locked{background:var(--border);color:var(--dim);cursor:not-allowed}
+
+/* Command Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:10px;width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+.modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-head h2{font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;font-size:20px;color:var(--dim);cursor:pointer}
+.modal-body{padding:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px}
+.field .val{font-size:13px}
+.field select,.field input[type=range]{width:100%;padding:9px;background:var(--bg);border:1px solid var(--border);border-radius:4px;font-size:13px}
+.vol-row{display:flex;align-items:center;gap:10px;margin-top:4px}
+.vol-row input{flex:1;accent-color:var(--nyu)}
+.vol-num{font-family:var(--mono);font-size:13px;color:var(--nyu);font-weight:700;min-width:36px;text-align:right}
+.offline-warn{padding:10px;background:#fee2e2;border:1px solid #fecaca;border-radius:4px;color:var(--red);font-size:12px;margin-bottom:14px}
+.preview{background:#1e1232;border-radius:4px;padding:14px;font-family:var(--mono);font-size:11px;color:#a78bfa;white-space:pre;overflow-x:auto;max-height:180px;overflow-y:auto;line-height:1.5}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);text-align:right}
+.btn-fire{padding:9px 22px;background:var(--nyu);color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-fire:hover{background:var(--nyu-light)}.btn-fire:disabled{opacity:0.4;cursor:not-allowed}
+
+/* Result panel (shown after command fires) */
+.result-panel{margin-top:14px;padding:14px;border-radius:4px;font-size:12px}
+.result-panel.ack{background:#dcfce7;border:1px solid #bbf7d0;color:#15803d}
+.result-panel.nack{background:#fee2e2;border:1px solid #fecaca;color:#dc2626}
+.result-panel.error{background:#fef3c7;border:1px solid #fde68a;color:#b45309}
+.result-panel h4{margin-bottom:6px;font-size:12px;text-transform:uppercase;letter-spacing:0.3px}
+.result-panel pre{font-family:var(--mono);font-size:10.5px;white-space:pre-wrap;margin-top:6px;color:inherit;opacity:0.9}
+
+/* Command Log */
+.log-wrap{max-height:300px;overflow-y:auto;background:#1e1232;padding:14px;font-family:var(--mono);font-size:11.5px}
+.log-row{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;color:#c4b5fd}
+.log-row:last-child{border-bottom:none}
+.log-row .ts{color:#7c6c9a}
+.log-row .res{font-weight:700}.log-row .res.ACK{color:#34d399}.log-row .res.NACK{color:#f87171}.log-row .res.DENIED{color:#fbbf24}.log-row .res.ERROR{color:#f87171}
+.log-detail{display:none;padding:8px;margin-top:4px;background:rgba(0,0,0,0.3);border-radius:4px;color:#a78bfa;white-space:pre-wrap;font-size:10px}
+.log-row.open .log-detail{display:block}
+.log-empty{color:#7c6c9a;font-style:italic;padding:20px;text-align:center}
+
+/* Access denied banner */
+.denied-banner{background:#fef3c7;border:1px solid #fde68a;border-radius:var(--radius);padding:16px 20px;color:#b45309;font-size:13px;margin-bottom:16px}
+
+/* Responsive */
+@media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- Topbar (populated after auth) -->
+<div class="topbar">
+  <h1>NYU AV Command Center</h1>
+  <div class="user" id="user-info"></div>
+</div>
+
+<!-- Loading state -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div>Authenticating and loading dashboard…</div>
+</div>
+
+<!-- Main content (hidden until data loads) -->
+<div class="content" id="main-content" style="display:none">
+
+  <!-- Stats row -->
+  <div class="stats">
+    <div class="stat"><div class="label">Total Equipment</div><div class="val" id="s-total">–</div></div>
+    <div class="stat"><div class="label">Online</div><div class="val green" id="s-online">–</div></div>
+    <div class="stat"><div class="label">Active Staff</div><div class="val blue" id="s-staff">–</div></div>
+    <div class="stat"><div class="label">Commands Logged</div><div class="val amber" id="s-cmds">–</div></div>
+  </div>
+
+  <!-- Access denied banner for technicians trying to access commands -->
+  <div class="denied-banner" id="denied-banner" style="display:none">
+    You are logged in as a <strong>Technician</strong>. Device command dispatch requires Manager access.
+  </div>
+
+  <!-- Equipment + Staff joined table -->
+  <div class="panel">
+    <div class="panel-head">
+      AV Equipment &amp; Assigned Staff
+      <span class="badge" id="eq-badge"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Device</th><th>Type</th><th>Location</th><th>Status</th><th>Staff On Shift</th><th id="action-th" style="display:none">Action</th>
+        </tr></thead>
+        <tbody id="eq-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Command Log (Manager only) -->
+  <div class="panel" id="log-panel" style="display:none">
+    <div class="panel-head">
+      Command Audit Log
+      <span class="badge" id="log-badge"></span>
+    </div>
+    <div class="log-wrap" id="log-body">
+      <div class="log-empty">No commands logged yet.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Command Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head"><h2>⚡ Command Builder</h2><button class="modal-close" id="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Target Device</label><div class="val" id="m-dev"></div></div>
+      <div class="field"><label>IP / Device ID</label><div class="val" id="m-id" style="font-family:var(--mono)"></div></div>
+      <div class="offline-warn" id="m-warn" style="display:none">⚠ Device is Offline — command will be queued.</div>
+      <div class="field">
+        <label>Command</label>
+        <select id="m-cmd">
+          <option value="power_on">power_on</option><option value="power_off">power_off</option>
+          <option value="reboot">reboot</option><option value="mute_audio">mute_audio</option>
+          <option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option>
+          <option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option>
+        </select>
+      </div>
+      <div class="field" id="vol-grp" style="display:none">
+        <label>Volume</label>
+        <div class="vol-row"><input type="range" id="m-vol" min="0" max="100" value="50"><div class="vol-num"><span id="vol-v">50</span>%</div></div>
+      </div>
+      <div class="field"><label>Payload Preview</label><div class="preview" id="m-preview"></div></div>
+      <div id="result-area"></div>
+    </div>
+    <div class="modal-foot"><button class="btn-fire" id="btn-fire">⚡ Fire Command</button></div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// CLIENT-SIDE UI LOGIC
+// ============================================================================
+// NOTE: All authorization happens server-side in Auth.gs / Commands.gs.
+// The client only manages display. Even if someone edits this HTML to
+// show the command button, the server-side triggerDeviceCommand() will
+// reject the call and log a DENIED entry.
+// ============================================================================
+
+let SESSION = null;    // Populated by getSessionData()
+let activeDevice = null;
+
+// === PAGE LOAD — fetch session + data ===
+google.script.run
+  .withSuccessHandler(initDashboard)
+  .withFailureHandler(e => {
+    document.getElementById('loading').innerHTML =
+      '<div style="color:#dc2626">Error loading dashboard: ' + e.message + '</div>';
+  })
+  .getSessionData();
+
+
+function initDashboard(data) {
+  SESSION = data;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+
+  // User info
+  document.getElementById('user-info').innerHTML =
+    data.email + '<span class="role-tag">' + data.role + '</span>';
+
+  // Stats
+  document.getElementById('s-total').textContent = data.stats.total;
+  document.getElementById('s-online').textContent = data.stats.online;
+  document.getElementById('s-staff').textContent = data.stats.activeStaff;
+  document.getElementById('s-cmds').textContent = data.stats.totalCommands;
+
+  // Equipment table
+  renderEquipmentTable(data.equipment, data.role);
+
+  // Role-specific UI
+  if (data.role === 'Manager') {
+    document.getElementById('action-th').style.display = '';
+    document.getElementById('log-panel').style.display = '';
+    if (data.commandLog) renderCommandLog(data.commandLog);
+  } else {
+    document.getElementById('denied-banner').style.display = '';
+  }
+}
+
+
+function renderEquipmentTable(equipment, role) {
+  const tbody = document.getElementById('eq-body');
+  document.getElementById('eq-badge').textContent = equipment.length + ' devices';
+
+  tbody.innerHTML = equipment.map(eq => {
+    // Staff chips
+    let staffHtml = '<span class="no-staff">No staff assigned</span>';
+    if (eq.assigned_staff.length > 0) {
+      staffHtml = '<div class="staff-chips">' +
+        eq.assigned_staff.map(s =>
+          '<span class="staff-chip">' + s.staff_name + ' (' + s.shift_start + '–' + s.shift_end + ')</span>'
+        ).join('') + '</div>';
+    }
+
+    // Action column (manager only)
+    let actionHtml = '';
+    if (role === 'Manager') {
+      actionHtml = '<td><button class="btn-cmd active" onclick="openModal(\'' +
+        eq.device_id + '\',\'' + eq.device_name.replace(/'/g, "\\'") + '\',\'' +
+        eq.device_type + '\',\'' + eq.status + '\')">⚡ Command</button></td>';
+    }
+
+    return '<tr>' +
+      '<td><strong>' + eq.device_name + '</strong></td>' +
+      '<td>' + eq.device_type + '</td>' +
+      '<td>' + eq.location + '</td>' +
+      '<td><span class="status ' + eq.status + '">' + eq.status + '</span></td>' +
+      '<td>' + staffHtml + '</td>' +
+      actionHtml +
+    '</tr>';
+  }).join('');
+}
+
+
+function renderCommandLog(logs) {
+  const body = document.getElementById('log-body');
+  document.getElementById('log-badge').textContent = logs.length + ' entries';
+
+  if (logs.length === 0) {
+    body.innerHTML = '<div class="log-empty">No commands logged yet.</div>';
+    return;
+  }
+
+  body.innerHTML = logs.map(log => {
+    const resClass = (log.result || '').split(' ')[0]; // ACK, NACK, DENIED, ERROR
+    return '<div class="log-row" onclick="this.classList.toggle(\'open\')">' +
+      '<span class="ts">[' + log.timestamp + ']</span> ' +
+      '<span class="res ' + resClass + '">' + resClass + '</span> → ' +
+      log.device_id + ' — ' + log.command + ' — ' + log.user_email +
+      '<div class="log-detail">' + (log.payload_json || '') + '\n\nResult: ' + (log.result || '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+
+// === COMMAND MODAL ===
+function openModal(deviceId, deviceName, deviceType, status) {
+  activeDevice = { id: deviceId, name: deviceName, type: deviceType, status: status };
+  document.getElementById('m-dev').textContent = deviceName + '  ·  ' + deviceType;
+  document.getElementById('m-id').textContent = deviceId;
+  document.getElementById('m-warn').style.display = status === 'Offline' ? 'block' : 'none';
+  document.getElementById('m-cmd').value = 'power_on';
+  document.getElementById('vol-grp').style.display = 'none';
+  document.getElementById('result-area').innerHTML = '';
+  document.getElementById('btn-fire').disabled = false;
+  updatePreview();
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  activeDevice = null;
+}
+
+function buildPreviewPayload() {
+  if (!activeDevice) return {};
+  const cmd = document.getElementById('m-cmd').value;
+  const payload = {
+    command: cmd,
+    device: activeDevice.id,
+    device_name: activeDevice.name,
+    issued_by: SESSION.email,
+    timestamp: new Date().toISOString()
+  };
+  if (cmd === 'set_volume') {
+    payload.parameters = { level: parseInt(document.getElementById('m-vol').value), unit: 'percent' };
+  }
+  return payload;
+}
+
+function updatePreview() {
+  document.getElementById('m-preview').textContent = JSON.stringify(buildPreviewPayload(), null, 2);
+}
+
+function fireCommand() {
+  if (!activeDevice) return;
+  const btn = document.getElementById('btn-fire');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = 'Dispatching…';
+
+  const cmd = document.getElementById('m-cmd').value;
+  const params = cmd === 'set_volume'
+    ? { level: parseInt(document.getElementById('m-vol').value) }
+    : {};
+
+  // Call server-side function — RBAC is re-checked there
+  google.script.run
+    .withSuccessHandler(function(response) {
+      btn.textContent = '⚡ Fire Command';
+      // Don't re-enable yet — show result first
+      showResult(response);
+      // Refresh stats and log
+      google.script.run.withSuccessHandler(function(data) {
+        document.getElementById('s-cmds').textContent = data.stats.totalCommands;
+        if (data.commandLog) renderCommandLog(data.commandLog);
+      }).getSessionData();
+    })
+    .withFailureHandler(function(e) {
+      btn.disabled = false;
+      btn.textContent = '⚡ Fire Command';
+      showResult({ result: 'ERROR', deviceResponse: { message: e.message } });
+    })
+    .triggerDeviceCommand(activeDevice.id, cmd, params);
+}
+
+function showResult(response) {
+  const area = document.getElementById('result-area');
+  const cls = (response.result || 'error').toLowerCase();
+  area.innerHTML = '<div class="result-panel ' + cls + '">' +
+    '<h4>' + (response.result === 'ACK' ? '✓ Device Acknowledged' :
+              response.result === 'NACK' ? '✗ Device Rejected' :
+              '⚠ Error') + '</h4>' +
+    '<div>' + (response.deviceResponse.message || '') + '</div>' +
+    '<pre>' + JSON.stringify(response.deviceResponse, null, 2) + '</pre>' +
+  '</div>';
+  // Re-enable fire button after showing result
+  setTimeout(() => { document.getElementById('btn-fire').disabled = false; }, 1500);
+}
+
+
+// === EVENT LISTENERS ===
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+document.getElementById('m-cmd').addEventListener('change', function() {
+  document.getElementById('vol-grp').style.display = this.value === 'set_volume' ? '' : 'none';
+  updatePreview();
+});
+document.getElementById('m-vol').addEventListener('input', function() {
+  document.getElementById('vol-v').textContent = this.value;
+  updatePreview();
+});
+document.getElementById('btn-fire').addEventListener('click', fireCommand);
+</script>
+</body>
+</html>
