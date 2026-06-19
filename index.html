@@ -130,6 +130,8 @@ input,select,textarea{cursor:text}
 .panel-head h2{font-size:13px;font-weight:700;color:var(--text-bright)}
 .panel-head .count{font-size:11px;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px;font-weight:600}
 .tbl-wrap{overflow-x:auto;max-height:460px;overflow-y:auto}
+.grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:1080px){.grid-2col{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
@@ -460,24 +462,31 @@ function renderMgrDash() {
   const offline = EQUIPMENT.filter(e => e.status === 'Offline').length;
   const today = fmtDate();
   const activeStaff = STAFF.filter(s => s.shift_date === today && s.status !== 'Pending').length;
+  const onSite = STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length;
   const page = $('page-mgr-dash');
 
   const statsHtml = `<div class="stats">
     <div class="stat"><div class="label">Total Equipment</div><div class="val">${EQUIPMENT.length}</div><div class="sub">Across 8 buildings</div></div>
     <div class="stat"><div class="label">Online Devices</div><div class="val g">${online}</div><div class="sub">${offline} offline, ${EQUIPMENT.length - online - offline} standby</div></div>
-    <div class="stat"><div class="label">Active Staff</div><div class="val b">${activeStaff}</div><div class="sub">${STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length} on-site now</div></div>
+    <div class="stat"><div class="label">Active Staff</div><div class="val b">${activeStaff}</div><div class="sub">${onSite} on-site now</div></div>
     <div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">${pendingCount}</div><div class="sub">This session</div></div>
   </div>`;
 
-  const tableHtml = `<div class="panel">
+  const equipHtml = `<div class="panel">
     <div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count">${EQUIPMENT.length} devices</div></div>
     <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead>
-    <tbody id="mgr-eq-tb">${EQUIPMENT.map(eq => {
-      const sc = eq.status.toLowerCase();
-      return `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td><button class="btn-cmd active" data-id="${eq.id}">Command</button></td></tr>`;
-    }).join('')}</tbody></table></div></div>`;
+    <tbody>${EQUIPMENT.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td><button class="btn-cmd active" data-id="${eq.id}">Command</button></td></tr>`).join('')}</tbody></table></div></div>`;
 
-  page.innerHTML = statsHtml + tableHtml;
+  const staffHtml = `<div class="panel">
+    <div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
+    <tbody>${STAFF.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+
+  const logHtml = `<div class="panel">
+    <div class="panel-head"><h2>Command Log</h2><div style="display:flex;align-items:center;gap:8px"><div class="live-dot" id="live-dot"></div><div class="count" id="log-count">0 commands</div></div></div>
+    <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands...</div></div></div>`;
+
+  page.innerHTML = statsHtml + `<div class="grid-2col">${equipHtml}${staffHtml}</div>` + logHtml;
   page.querySelectorAll('.btn-cmd.active').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
 }
 
@@ -539,8 +548,6 @@ function fireCommand() {
 
 // === COMMAND LOG ===
 function appendLog(dev, payload) {
-  // Navigate to log page if not there
-  if (currentPage !== 'page-mgr-log') navigateTo('page-mgr-log');
   const logBody = $('log-body');
   const logCount = $('log-count');
   const liveDot = $('live-dot');
