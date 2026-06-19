@@ -1,18 +1,82 @@
+<div align="center">
+
 # NYU AV Command Center
 
-Operational dashboard for managing AV equipment, staff scheduling, and device command dispatch across NYU buildings. Built as a technical submission for the AV & Media Services team.
+**Operational Dashboard for AV & Media Services**
 
-**[Live Demo](https://krishan101.github.io/nyu-av-command-center/)** · `manager` / `mgr456` · `technician` / `tech123`
+[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-57068C?style=for-the-badge&logo=github)](https://krishan101.github.io/nyu-av-command-center/)
+[![Python](https://img.shields.io/badge/Flask-Mock_Server-3776AB?style=for-the-badge&logo=python&logoColor=white)](mock-device-server/)
+[![Apps Script](https://img.shields.io/badge/Google-Apps_Script-34A853?style=for-the-badge&logo=google&logoColor=white)](apps-script/)
 
 ---
 
-## Overview
+*A two-tier AV equipment management prototype — an instant GitHub Pages demo*
+*and a full-stack Google Apps Script + Flask implementation with server-side RBAC,*
+*real HTTP command dispatch, and audit logging.*
 
-The project has two implementations:
+</div>
 
-**GitHub Pages demo** (`index.html`) — A self-contained single-file dashboard. Open the link, log in, fire commands. No setup needed.
+---
 
-**Full-stack version** (`apps-script/` + `mock-device-server/`) — Google Apps Script web app with server-side RBAC, a Python Flask endpoint simulating AV hardware, real HTTP dispatch via `UrlFetchApp.fetch()`, and an audit log written to the Google Sheet.
+## Try It Now
+
+> **No setup required.** Open the link, log in, fire a command.
+
+### [Launch Live Demo](https://krishan101.github.io/nyu-av-command-center/)
+
+| Username | Password | Role | Access Level |
+|:--------:|:--------:|:----:|:------------|
+| `manager` | `mgr456` | Manager | Full access — dispatch device commands |
+| `technician` | `tech123` | Technician | Read-only — commands blocked + logged |
+
+---
+
+## What It Does
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    NYU AV COMMAND CENTER                      │
+├──────────────┬──────────────┬──────────────┬─────────────────┤
+│  Equipment   │  Staff       │  Commands    │  Audit Log      │
+│  Inventory   │  Shift       │  Builder +   │  Every attempt  │
+│  10 devices  │  Schedule    │  JSON Preview│  tracked        │
+│  8 buildings │  8 staff     │  ACK/NACK    │  (incl. denied) │
+└──────────────┴──────────────┴──────────────┴─────────────────┘
+```
+
+- **Equipment monitoring** — Crestron, QSC, Biamp, Extron, Shure, Sennheiser across 8 real NYU buildings
+- **Staff scheduling** — Lead Technicians, AV Technicians, Event Support with shift times and location tracking
+- **Command dispatch** — Build JSON payloads, preview live, fire to devices, see ACK/NACK responses
+- **Role-based access** — Enforced server-side, not just hidden buttons
+- **Audit trail** — Every command attempt logged (successful and denied)
+
+---
+
+## Two Implementations
+
+### 1. GitHub Pages Demo — `index.html`
+
+Zero-dependency, single-file dashboard. NYU violet + white branding with dark mode toggle.
+
+```
+Open browser → Log in → Fire commands → See JSON in Command Log
+```
+
+### 2. Full-Stack — `apps-script/` + `mock-device-server/`
+
+Production-oriented architecture with real HTTP communication:
+
+```
+┌─────────────────┐         ┌──────────────────┐         ┌─────────────────┐
+│  Apps Script     │  POST   │  Flask Server     │  ACK/   │  Google Sheet   │
+│  Web App         │────────>│  /device/command  │  NACK   │  CommandLog Tab │
+│                  │<────────│                   │         │                 │
+│  Auth.gs ────────┤         │  Validates JSON   │         │  Audit trail    │
+│  RBAC check via  │         │  Returns ACK/NACK │         │  for every      │
+│  Session.get     │         │  with tx ID       │         │  attempt        │
+│  ActiveUser()    │         └──────────────────┘         └─────────────────┘
+└─────────────────┘
+```
 
 ---
 
@@ -20,25 +84,27 @@ The project has two implementations:
 
 ```
 nyu-av-command-center/
-├── index.html                         GitHub Pages demo
-├── SUBMISSION.md                      Testing instructions
 │
-├── apps-script/
-│   ├── Code.gs                        Entry point, data join logic
+├── index.html                         GitHub Pages demo (481 lines)
+├── SUBMISSION.md                      Testing guide for reviewer
+├── README.md
+│
+├── apps-script/                       Google Apps Script backend
+│   ├── Code.gs                        Entry point + data join logic
 │   ├── Auth.gs                        Server-side RBAC enforcement
-│   ├── Commands.gs                    Build, validate, POST, log
-│   ├── SeedData.gs                    Populate sheet with mock data
-│   ├── index.html                     Web app UI
-│   └── appsscript.json
+│   ├── Commands.gs                    Build → validate → POST → log
+│   ├── SeedData.gs                    Populate Sheet with mock data
+│   ├── index.html                     Web App UI
+│   └── appsscript.json                Manifest
 │
-├── mock-device-server/
+├── mock-device-server/                Python Flask mock hardware
 │   ├── mock_device_server.py          /device/command endpoint
-│   ├── requirements.txt
+│   ├── requirements.txt               flask, flask-cors, gunicorn
 │   └── Procfile                       Render deployment
 │
-├── data/
-│   ├── equipment-inventory.csv        Spreadsheet A — 10 devices
-│   └── staff-schedules.csv            Spreadsheet B — 8 staff
+├── data/                              Mock spreadsheet sources
+│   ├── equipment-inventory.csv        Spreadsheet A (17 columns)
+│   └── staff-schedules.csv            Spreadsheet B (14 columns)
 │
 └── docs/
     └── ARCHITECTURE.md                Production scaling plan
@@ -46,56 +112,135 @@ nyu-av-command-center/
 
 ---
 
-## RBAC
+## How RBAC Works
 
-Authorization is enforced server-side, not by hiding buttons.
+```
+                    ┌──────────────────────────────┐
+                    │     Client clicks button     │
+                    └──────────────┬───────────────┘
+                                   │
+                    ┌──────────────▼───────────────┐
+                    │  google.script.run            │
+                    │  .triggerDeviceCommand()       │
+                    └──────────────┬───────────────┘
+                                   │
+                    ┌──────────────▼───────────────┐
+                    │  Auth.requireRole("Manager")  │
+                    │  ┌─────────────────────────┐  │
+                    │  │ Session.getActiveUser()  │  │
+                    │  │ .getEmail()              │  │
+                    │  │ → lookup in Users tab    │  │
+                    │  └─────────────────────────┘  │
+                    └──────┬───────────────┬───────┘
+                           │               │
+                    ┌──────▼──────┐ ┌──────▼──────┐
+                    │  Manager    │ │  Other      │
+                    │  Proceed    │ │  DENIED     │
+                    │  to build   │ │  + logged   │
+                    │  payload    │ │  to Sheet   │
+                    └─────────────┘ └─────────────┘
+```
 
-The client hides the command button for Technicians as a UX convenience. But the actual gate is in `Auth.gs` — every call to `triggerDeviceCommand()` re-checks the caller's email against the Users sheet tab via `Session.getActiveUser().getEmail()`. If a Technician's request reaches the server (e.g., via DOM manipulation), it's rejected and logged as `ACCESS_DENIED`.
+| Layer | Security |
+|:------|:---------|
+| **Client** | Hides button for Technicians *(convenience, not security)* |
+| **Server** | `Auth.requireRole()` re-checks email against Users tab on **every** call |
+| **Audit** | Denied attempts written to CommandLog with `ACCESS_DENIED` status |
 
 ---
 
 ## Command Flow
 
-1. Manager clicks "Command" on a device row
-2. Client calls `google.script.run.triggerDeviceCommand(deviceId, command, params)`
-3. Server re-checks role from Users tab
-4. Server builds JSON payload from Equipment sheet data
-5. Server validates payload against schema (required fields, valid commands)
-6. Server POSTs to Flask via `UrlFetchApp.fetch()`
-7. Flask validates JSON, returns ACK (online device) or NACK (offline/malformed)
-8. Server logs the attempt + result to CommandLog tab
-9. Payload and device response returned to UI
+```
+Manager clicks "Command"
+       │
+       ▼
+┌─ Server-side ──────────────────────────────────┐
+│                                                 │
+│  1. Auth.requireRole("Manager")    ← RBAC      │
+│  2. buildCommandPayload()          ← from Sheet │
+│  3. validateCommandSchema()        ← schema     │
+│  4. UrlFetchApp.fetch(FLASK_URL)   ← real HTTP  │
+│  5. logCommandAttempt()            ← audit      │
+│                                                 │
+└─────────────────────┬───────────────────────────┘
+                      │
+                      ▼
+              Flask returns ACK
+      ┌───────────────────────────┐
+      │ { "status": "ACK",       │
+      │   "transaction_id": "…", │
+      │   "command_executed":     │
+      │     "power_on",          │
+      │   "details": {           │
+      │     "power_state": "ON", │
+      │     "warm_up_seconds": 12│
+      │   }                      │
+      │ }                        │
+      └───────────────────────────┘
+```
+
+---
+
+## Feature Comparison
+
+| Feature | GitHub Pages Demo | Apps Script Version |
+|:--------|:-----------------:|:-------------------:|
+| Equipment + Staff view | Side-by-side tables | Joined on location |
+| RBAC | Client-side + JS logic | Server-side (Sheet lookup) |
+| Command builder + JSON preview | Yes | Yes |
+| HTTP POST to device | Simulated in-memory | Real fetch to Flask |
+| Device ACK/NACK response | — | From Flask server |
+| Audit log persistence | Session only | Written to Sheet tab |
+| Denied attempt logging | — | ACCESS_DENIED entries |
+| Light/Dark mode toggle | Yes | — |
+| NYU branding | Yes | Yes |
 
 ---
 
 ## Setup
 
-**Flask server** (local):
+### Flask Mock Device Server
+
 ```bash
 cd mock-device-server
 pip install -r requirements.txt
 flask run --port 5050
 ```
 
-**Flask server** (Render): set root to `mock-device-server`, start command `gunicorn mock_device_server:app`.
+**Test it:**
+```bash
+curl -X POST http://localhost:5050/device/command \
+  -H "Content-Type: application/json" \
+  -d '{"command":"power_on","device":"EQ-001","issued_by":"test@nyu.edu","timestamp":"2026-06-18T12:00:00Z"}'
+```
 
-**Apps Script**: create a Google Sheet, open Apps Script editor, paste the files from `apps-script/`, run `seedAllTabs()`, add your email to the Users tab, update `CONFIG.DEVICE_SERVER_URL` in Code.gs, deploy as web app.
+**Deploy to Render (free):** Set root directory to `mock-device-server`, start command `gunicorn mock_device_server:app`.
 
-Full setup details in [SUBMISSION.md](SUBMISSION.md).
+### Google Apps Script
+
+1. Create a new Google Sheet, open **Extensions > Apps Script**
+2. Create files matching `apps-script/` and paste contents
+3. Run `seedAllTabs()` to populate the 4 sheet tabs
+4. Add your Google email to the **Users** tab as `Manager`
+5. Update `CONFIG.DEVICE_SERVER_URL` in Code.gs
+6. **Deploy > Web app** — access: "Anyone with Google account"
+
+Full step-by-step in [SUBMISSION.md](SUBMISSION.md).
 
 ---
 
 ## Design Decisions
 
-**Two-tier delivery.** The Pages demo gives a 30-second first impression. The Apps Script version proves the architecture works end-to-end with real HTTP and server-side auth.
+1. **Two-tier delivery** — The Pages demo gives a 30-second first impression. The Apps Script version proves the architecture works end-to-end with real HTTP and server-side auth.
 
-**Role re-check on every call.** Could cache client-side, but verifying on each privileged action is the correct security posture — zero risk of stale or manipulated client escalation.
+2. **Server-side role lookup on every call** — Could cache client-side, but re-checking is the correct security posture. Small latency cost, zero risk of stale or manipulated client escalation.
 
-**Equipment and Shifts joined on location.** Instead of two disconnected tables, the Apps Script version joins on location so each device row shows who's currently on shift there.
+3. **Equipment + Shifts joined on location** — Instead of two disconnected tables, we show who's on shift for each device's location. Operationally useful — you see at a glance who to call about a device.
 
-**Denied attempts logged.** The CommandLog tab records every attempt including blocked ones — useful for investigating unauthorized access.
+4. **Audit log includes denied attempts** — Most dashboards only log successes. Logging denials creates an audit trail for investigating unauthorized access — critical for institutional compliance.
 
-**Flask as a separate service.** Mirrors real topology where AV controllers sit on separate network segments. Apps Script talks to Flask over HTTP, same as production would talk to Crestron/QSC/Biamp control APIs.
+5. **Flask as a separate service** — Mirrors real topology where AV controllers sit on separate VLANs. Apps Script talks to Flask over HTTP, just like production would talk to Crestron/QSC/Biamp control APIs.
 
 ---
 
@@ -105,3 +250,13 @@ Full setup details in [SUBMISSION.md](SUBMISSION.md).
 - Mock device server doesn't persist state between calls
 - No automated tests (would add with more time)
 - GitHub Pages demo uses in-memory session, not real auth
+
+---
+
+<div align="center">
+
+**Built for NYU AV & Media Services**
+
+*Operational tooling for the team that keeps every classroom, event space, and lecture hall running.*
+
+</div>
