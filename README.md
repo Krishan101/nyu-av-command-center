@@ -20,14 +20,14 @@
 
 ## Try It Now
 
-> **No setup required.** Open the link, log in, fire a command.
+> **No setup required.** Open the link, log in, start using it.
 
 ### [Launch Live Demo](https://krishan101.github.io/nyu-av-command-center/)
 
-| Username | Password | Role | Access Level |
+| Username | Password | Role | What You See |
 |:--------:|:--------:|:----:|:------------|
-| `manager` | `mgr456` | Manager | Full access — dispatch device commands |
-| `technician` | `tech123` | Technician | Read-only — commands blocked + logged |
+| `manager` | `mgr456` | Manager | Full dashboard — equipment, staff, commands, audit log |
+| `technician` | `tech123` | Technician | Personalized view — your shift, your devices, team availability |
 
 ---
 
@@ -39,16 +39,19 @@
 ├──────────────┬──────────────┬──────────────┬─────────────────┤
 │  Equipment   │  Staff       │  Commands    │  Audit Log      │
 │  Inventory   │  Shift       │  Builder +   │  Every attempt  │
-│  10 devices  │  Schedule    │  JSON Preview│  tracked        │
-│  8 buildings │  8 staff     │  ACK/NACK    │  (incl. denied) │
+│  10 devices  │  Schedule    │  JSON Preview│  tracked +      │
+│  8 buildings │  8 staff     │  ACK/NACK    │  exportable     │
 └──────────────┴──────────────┴──────────────┴─────────────────┘
 ```
 
-- **Equipment monitoring** — Crestron, QSC, Biamp, Extron, Shure, Sennheiser across 8 real NYU buildings
-- **Staff scheduling** — Lead Technicians, AV Technicians, Event Support with shift times and location tracking
-- **Command dispatch** — Build JSON payloads, preview live, fire to devices, see ACK/NACK responses
-- **Role-based access** — Enforced server-side, not just hidden buttons
-- **Audit trail** — Every command attempt logged (successful and denied)
+- **Role-specific dashboards** — Managers see everything. Technicians see their shift, their assigned devices, and a team view via the burger menu.
+- **Search and filter** — Instant filtering across equipment and staff tables by name, type, building, or IP. Press `/` to focus search.
+- **Device detail panel** — Click any device row to expand firmware version, last ping, assigned tech, floor/room, and operational notes.
+- **Command dispatch** — Build JSON payloads, preview live, fire to devices. Destructive commands (`power_off`, `reboot`) show a confirmation warning.
+- **Notification alerts** — Red dot on the menu icon when devices are offline. Alert banners on the dashboard for offline equipment.
+- **Audit log with export** — Every command logged with timestamp and full payload. Export as CSV for reporting.
+- **Last activity timestamp** — Simulated system check indicator shows time since last poll.
+- **Accessible** — ARIA labels, roles, live regions, keyboard shortcuts, focus management, screen reader support.
 
 ---
 
@@ -56,11 +59,7 @@
 
 ### 1. GitHub Pages Demo — `index.html`
 
-Zero-dependency, single-file dashboard. NYU violet + white branding with dark mode toggle.
-
-```
-Open browser → Log in → Fire commands → See JSON in Command Log
-```
+Single-file, zero-dependency dashboard. Opens in a browser and works immediately.
 
 ### 2. Full-Stack — `apps-script/` + `mock-device-server/`
 
@@ -71,8 +70,8 @@ Production-oriented architecture with real HTTP communication:
 │  Apps Script     │  POST   │  Flask Server     │  ACK/   │  Google Sheet   │
 │  Web App         │────────>│  /device/command  │  NACK   │  CommandLog Tab │
 │                  │<────────│                   │         │                 │
-│  Auth.gs ────────┤         │  Validates JSON   │         │  Audit trail    │
-│  RBAC check via  │         │  Returns ACK/NACK │         │  for every      │
+│  Auth.gs         │         │  Validates JSON   │         │  Audit trail    │
+│  RBAC via        │         │  Returns ACK/NACK │         │  for every      │
 │  Session.get     │         │  with tx ID       │         │  attempt        │
 │  ActiveUser()    │         └──────────────────┘         └─────────────────┘
 └─────────────────┘
@@ -85,14 +84,14 @@ Production-oriented architecture with real HTTP communication:
 ```
 nyu-av-command-center/
 │
-├── index.html                         GitHub Pages demo (481 lines)
+├── index.html                         GitHub Pages demo (555 lines)
 ├── SUBMISSION.md                      Testing guide for reviewer
 ├── README.md
 │
 ├── apps-script/                       Google Apps Script backend
 │   ├── Code.gs                        Entry point + data join logic
 │   ├── Auth.gs                        Server-side RBAC enforcement
-│   ├── Commands.gs                    Build → validate → POST → log
+│   ├── Commands.gs                    Build, validate, POST, log
 │   ├── SeedData.gs                    Populate Sheet with mock data
 │   ├── index.html                     Web App UI
 │   └── appsscript.json                Manifest
@@ -120,32 +119,25 @@ nyu-av-command-center/
                     └──────────────┬───────────────┘
                                    │
                     ┌──────────────▼───────────────┐
-                    │  google.script.run            │
-                    │  .triggerDeviceCommand()       │
-                    └──────────────┬───────────────┘
-                                   │
-                    ┌──────────────▼───────────────┐
-                    │  Auth.requireRole("Manager")  │
+                    │  triggerDeviceCommand()        │
                     │  ┌─────────────────────────┐  │
-                    │  │ Session.getActiveUser()  │  │
-                    │  │ .getEmail()              │  │
-                    │  │ → lookup in Users tab    │  │
+                    │  │ Check session.role       │  │
+                    │  │ !== "manager" ? BLOCK    │  │
                     │  └─────────────────────────┘  │
                     └──────┬───────────────┬───────┘
                            │               │
                     ┌──────▼──────┐ ┌──────▼──────┐
                     │  Manager    │ │  Other      │
-                    │  Proceed    │ │  DENIED     │
-                    │  to build   │ │  + logged   │
-                    │  payload    │ │  to Sheet   │
+                    │  Proceed    │ │  Blocked    │
+                    │  to build   │ │  (in logic, │
+                    │  payload    │ │  not just   │
+                    │             │ │  UI hiding) │
                     └─────────────┘ └─────────────┘
 ```
 
-| Layer | Security |
-|:------|:---------|
-| **Client** | Hides button for Technicians *(convenience, not security)* |
-| **Server** | `Auth.requireRole()` re-checks email against Users tab on **every** call |
-| **Audit** | Denied attempts written to CommandLog with `ACCESS_DENIED` status |
+The client hides buttons for Technicians as a UX convenience. But the actual gate is in `fireCommand()` — it re-checks `session.role !== 'manager'` before executing. Even DOM manipulation won't bypass it.
+
+In the Apps Script version, `Auth.requireRole("Manager")` re-checks the caller's email against the Users sheet tab via `Session.getActiveUser().getEmail()`, and denied attempts are logged.
 
 ---
 
@@ -155,29 +147,19 @@ nyu-av-command-center/
 Manager clicks "Command"
        │
        ▼
-┌─ Server-side ──────────────────────────────────┐
-│                                                 │
-│  1. Auth.requireRole("Manager")    ← RBAC      │
-│  2. buildCommandPayload()          ← from Sheet │
-│  3. validateCommandSchema()        ← schema     │
-│  4. UrlFetchApp.fetch(FLASK_URL)   ← real HTTP  │
-│  5. logCommandAttempt()            ← audit      │
-│                                                 │
-└─────────────────────┬───────────────────────────┘
-                      │
-                      ▼
-              Flask returns ACK
-      ┌───────────────────────────┐
-      │ { "status": "ACK",       │
-      │   "transaction_id": "…", │
-      │   "command_executed":     │
-      │     "power_on",          │
-      │   "details": {           │
-      │     "power_state": "ON", │
-      │     "warm_up_seconds": 12│
-      │   }                      │
-      │ }                        │
-      └───────────────────────────┘
+  Modal opens: select command, preview JSON
+       │
+       ▼
+  Destructive? (power_off, reboot) → confirmation warning
+       │
+       ▼
+  "Fire Command" clicked
+       │
+       ▼
+  RBAC re-check → build payload → log to command log
+       │
+       ▼
+  Toast notification + log entry with expandable JSON
 ```
 
 ---
@@ -186,15 +168,19 @@ Manager clicks "Command"
 
 | Feature | GitHub Pages Demo | Apps Script Version |
 |:--------|:-----------------:|:-------------------:|
-| Equipment + Staff view | Side-by-side tables | Joined on location |
+| Role-specific dashboards | Yes | Yes |
+| Search and filter | Yes | Yes |
+| Device detail panel | Yes | Yes |
+| Destructive command confirmation | Yes | Yes |
+| Notification dot (offline devices) | Yes | Yes |
+| Command log export (CSV) | Yes | Yes (Sheet tab) |
+| Last activity timestamp | Yes | — |
 | RBAC | Client-side + JS logic | Server-side (Sheet lookup) |
-| Command builder + JSON preview | Yes | Yes |
 | HTTP POST to device | Simulated in-memory | Real fetch to Flask |
 | Device ACK/NACK response | — | From Flask server |
-| Audit log persistence | Session only | Written to Sheet tab |
 | Denied attempt logging | — | ACCESS_DENIED entries |
-| Light/Dark mode toggle | Yes | — |
-| NYU branding | Yes | Yes |
+| Accessibility (ARIA, keyboard) | Yes | Yes |
+| Light/Dark mode | Yes | — |
 
 ---
 
@@ -226,21 +212,23 @@ curl -X POST http://localhost:5050/device/command \
 5. Update `CONFIG.DEVICE_SERVER_URL` in Code.gs
 6. **Deploy > Web app** — access: "Anyone with Google account"
 
-Full step-by-step in [SUBMISSION.md](SUBMISSION.md).
+Full testing steps in [SUBMISSION.md](SUBMISSION.md).
 
 ---
 
 ## Design Decisions
 
-1. **Two-tier delivery** — The Pages demo gives a 30-second first impression. The Apps Script version proves the architecture works end-to-end with real HTTP and server-side auth.
+1. **Role-specific dashboards** — Technicians see their shift and their assigned devices. Managers see everything. This mirrors how real ops teams work — techs care about their zone, managers care about the full picture.
 
-2. **Server-side role lookup on every call** — Could cache client-side, but re-checking is the correct security posture. Small latency cost, zero risk of stale or manipulated client escalation.
+2. **Server-side RBAC on every call** — Could cache client-side, but re-verifying on each privileged action is the correct security posture. Zero risk of stale or manipulated client escalation.
 
-3. **Equipment + Shifts joined on location** — Instead of two disconnected tables, we show who's on shift for each device's location. Operationally useful — you see at a glance who to call about a device.
+3. **Destructive command confirmation** — `power_off` and `reboot` show a warning before firing. You don't accidentally shut down a projector mid-lecture.
 
-4. **Audit log includes denied attempts** — Most dashboards only log successes. Logging denials creates an audit trail for investigating unauthorized access — critical for institutional compliance.
+4. **Search at scale** — 10 devices is a demo. A real NYU deployment has hundreds. The search bar shows the thinking even if the dataset is small.
 
-5. **Flask as a separate service** — Mirrors real topology where AV controllers sit on separate VLANs. Apps Script talks to Flask over HTTP, just like production would talk to Crestron/QSC/Biamp control APIs.
+5. **Audit trail with export** — Every command logged with full payload. Exportable as CSV for compliance and incident reports.
+
+6. **Accessibility** — ARIA labels, keyboard shortcuts, focus management, screen reader support. Most prototypes skip this — doing it right signals production-quality thinking.
 
 ---
 

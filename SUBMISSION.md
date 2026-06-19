@@ -1,7 +1,6 @@
 # Submission — NYU AV Command Center
 
 **Position:** AV & Media Services — Operations Technology
-**Supervisor:** Ben Vien, Senior Director
 
 ---
 
@@ -9,153 +8,127 @@
 
 | Deliverable | Location |
 |-------------|----------|
-| **Live demo (instant)** | [krishan101.github.io/nyu-av-command-center](https://krishan101.github.io/nyu-av-command-center/) |
+| **Live demo** | [krishan101.github.io/nyu-av-command-center](https://krishan101.github.io/nyu-av-command-center/) |
 | **Source code** | [github.com/Krishan101/nyu-av-command-center](https://github.com/Krishan101/nyu-av-command-center) |
-| **Apps Script project** | `apps-script/` — Code.gs, Auth.gs, Commands.gs, SeedData.gs, index.html |
-| **Flask mock device server** | `mock-device-server/` — mock_device_server.py + requirements.txt |
-| **Mock data (Spreadsheet A)** | `data/equipment-inventory.csv` — 10 AV devices across 8 NYU buildings |
-| **Mock data (Spreadsheet B)** | `data/staff-schedules.csv` — 8 staff shift entries |
+| **Apps Script project** | `apps-script/` |
+| **Flask mock device server** | `mock-device-server/` |
+| **Mock data — Equipment** | `data/equipment-inventory.csv` |
+| **Mock data — Staff** | `data/staff-schedules.csv` |
 | **Architecture plan** | `docs/ARCHITECTURE.md` |
 
 ---
 
-## Two Ways to Test
+## How to Test
 
-### Option A — GitHub Pages Demo (30 seconds, no setup)
+### Quick Start
 
-1. Open [krishan101.github.io/nyu-av-command-center](https://krishan101.github.io/nyu-av-command-center/)
-2. Log in with one of these accounts:
+Open [krishan101.github.io/nyu-av-command-center](https://krishan101.github.io/nyu-av-command-center/) — no install needed.
 
-| Username | Password | Role | What You Can Do |
-|----------|----------|------|-----------------|
-| `manager` | `mgr456` | Manager | View data + dispatch device commands |
-| `technician` | `tech123` | Technician | View data only (commands blocked) |
-
-3. As Manager: click **⚡ Command** on any device → select a command → see the live JSON preview → click **⚡ Fire Command**
-4. Scroll down to the **Command Log** → click any entry to expand the full JSON payload
-5. Toggle light/dark mode with the 🌙 button
-
-### Option B — Full-Stack Version (Apps Script + Flask)
-
-See the [README Setup Instructions](README.md#setup-flask-mock-device-server) for detailed steps. Summary:
-
-1. Deploy the Flask server (`mock-device-server/`) to Render or run locally
-2. Create a Google Sheet and set up the Apps Script project (`apps-script/`)
-3. Run `seedAllTabs()` to populate the 4 sheet tabs
-4. Add your test Google account emails to the Users tab
-5. Deploy the web app and open the URL
+| Username | Password | Role |
+|----------|----------|------|
+| `manager` | `mgr456` | Manager — full access |
+| `technician` | `tech123` | Technician — personalized read-only |
 
 ---
 
-## How to Test Roles
+### Testing Manager Role
 
-### Manager
-- Sees all equipment and staff data in a joined view (equipment + who's on shift at that location)
-- "⚡ Command" button is active on every device row
-- Can open the Command Builder modal, select a command, and fire it
-- After firing: sees the device's ACK/NACK response inline
-- Can view the Command Audit Log panel at the bottom
-- Command log shows every attempt with full JSON payload
+1. Log in as `manager` / `mgr456`
+2. You see: stats row, equipment + staff tables side by side, command log at bottom
+3. If any devices are offline, a red alert bar appears at the top
+4. **Search:** type in the search bar to filter equipment by name, type, or building (or press `/`)
+5. **Device detail:** click any equipment row — it expands to show firmware, last ping, assigned tech, notes
+6. **Fire a command:** click "Command" on any device → select a command → see live JSON preview → click "Fire Command"
+7. **Destructive commands:** selecting `power_off` or `reboot` shows an amber confirmation warning
+8. **Offline devices:** clicking Command on an offline device shows a red warning in the modal
+9. **Command log:** after firing, the log shows the entry with a pulse animation. Click to expand the full JSON payload.
+10. **Export:** click "Export CSV" on the command log to download the log as a CSV file
+11. **Burger menu:** open the sidebar to navigate between Dashboard, Staff Schedule, and Command Log views
 
-### Technician
-- Sees the same equipment + staff data
-- Command buttons are locked (🔒) with a "Manager access required" tooltip
-- A banner reads: "You are logged in as a Technician. Device command dispatch requires Manager access."
-- **Server-side enforcement:** even if someone edits the HTML to show the button and calls `triggerDeviceCommand()`, the server rejects it and logs an ACCESS_DENIED entry
+### Testing Technician Role
 
-### Invalid Login (GitHub Pages demo)
-- Enter wrong credentials → inline error "Invalid credentials"
-- Password field clears, no browser alert
+1. Log out, log in as `technician` / `tech123`
+2. You see a personalized dashboard — not the full inventory
+3. **Shift card:** shows Alex Rivera's shift time, location, and status
+4. **Assigned devices only:** shows 2 devices (Crestron DM-NVX-350 and QSC Q-SYS Core 110f) — not all 10
+5. **Alert banner:** green if all devices are online, red if any are offline
+6. **Device detail:** click a device row to expand details (same as manager)
+7. **No command buttons** anywhere — read-only view
+8. **Burger menu:** "Staff On Shift" shows today's staff with search. "All Equipment" shows the full read-only inventory with search.
+9. **Notification dot:** if any assigned devices are offline, a red dot appears on the burger menu icon
+
+### Testing RBAC
+
+Even if someone edits the HTML to show a command button, `fireCommand()` checks `session.role !== 'manager'` before executing. The gate is in the logic, not just the UI.
+
+### Testing Edge Cases
+
+| Scenario | Expected |
+|----------|----------|
+| Wrong login | "Invalid credentials" inline, password clears |
+| Double-fire | Button disables for 1 second after click |
+| Escape key | Closes modal and sidebar |
+| `/` key | Focuses the search bar on the active page |
+| Click outside modal | Modal closes |
+| Offline device command | Red warning in modal, command still fires (queued) |
+| `power_off` or `reboot` | Amber warning: "This is a destructive command" |
+| Light/dark toggle | Moon/sun button in top bar |
 
 ---
 
-## How the Device Command Is Triggered
+### Where to View the JSON Payload
 
-1. Manager clicks **⚡ Command** on a device row
-2. The Command Builder modal opens with device name and ID pre-filled
-3. Select a command from the dropdown: `power_on`, `power_off`, `reboot`, `mute_audio`, `unmute_audio`, `switch_input_hdmi`, `switch_input_vga`, `set_volume`
-4. If `set_volume` is selected, a slider appears (0–100)
-5. The **Payload Preview** section updates live as selections change
-6. Click **⚡ Fire Command**
-
-**Full-stack version flow:**
-- Client calls `google.script.run.triggerDeviceCommand(deviceId, command, params)`
-- Server re-checks RBAC via `Session.getActiveUser().getEmail()`
-- Server builds and validates the JSON payload
-- Server POSTs to Flask via `UrlFetchApp.fetch()`
-- Flask validates the JSON schema and returns ACK or NACK
-- Server logs everything to the CommandLog sheet tab
-- Server returns the payload + device response to the UI
-
----
-
-## Where to View the Generated JSON Payload
-
-### GitHub Pages Demo
-- **Before firing:** in the "Payload Preview" section of the Command Builder modal
-- **After firing:** in the Command Log terminal at the bottom — click any entry to expand the full JSON
-
-### Apps Script Version
-- **Before firing:** same Payload Preview section in the modal
-- **After firing:**
-  - In the modal's result panel (shows ACK/NACK + device response JSON)
-  - In the Command Audit Log panel (click any row to expand)
-  - In the **CommandLog** tab of the Google Sheet (raw data, every field)
+- **Before firing:** in the modal's "Payload Preview" section (updates live as you change selections)
+- **After firing:** in the Command Log — click any entry to expand the full JSON
+- **Downloaded:** click "Export CSV" to get a file with all dispatched commands
 
 ### Sample Payload
 
 ```json
 {
-  "command": "power_on",
-  "device": "EQ-001",
-  "device_name": "Crestron DM-NVX-350",
-  "device_type": "Video Switcher",
-  "location": "Bobst Library",
-  "issued_by": "manager@nyu.edu",
-  "role": "Manager",
-  "timestamp": "2026-06-18T14:30:00.000Z"
-}
-```
-
-### Sample Device ACK Response (from Flask)
-
-```json
-{
-  "status": "ACK",
-  "transaction_id": "A1B2C3D4",
-  "device_id": "EQ-001",
-  "device_name": "Crestron DM-NVX-350",
-  "command_executed": "power_on",
-  "message": "Command 'power_on' accepted by Crestron DM-NVX-350",
-  "details": { "power_state": "ON", "warm_up_seconds": 12 },
-  "timestamp": "2026-06-18T14:30:01.234Z"
+  "api_version": "1.0",
+  "timestamp": "2026-06-18T14:30:00.000Z",
+  "issued_by": { "user": "manager", "role": "manager" },
+  "target_device": {
+    "device_id": "EQ-001",
+    "device_name": "Crestron DM-NVX-350",
+    "device_type": "Video Switcher",
+    "ip_address": "10.18.4.101",
+    "location": { "building": "Bobst Library", "room": "LL1-03" }
+  },
+  "command": { "action": "power_on", "parameters": {} },
+  "status": "dispatched"
 }
 ```
 
 ---
 
-## How the Audit Log Works
+### Full-Stack Version (Apps Script + Flask)
 
-The CommandLog sheet tab records every action:
+See [README.md](README.md#setup) for setup instructions. Summary:
 
-| Column | Description |
-|--------|-------------|
-| `timestamp` | ISO 8601 timestamp |
-| `user_email` | Caller's Google account email |
-| `role` | Manager or Technician (looked up server-side) |
-| `device_id` | Target device, or "N/A" for denied attempts |
-| `command` | The command, or "ACCESS_DENIED" for blocked attempts |
-| `payload_json` | Full JSON payload that was sent (or attempted) |
-| `result` | ACK, NACK, ERROR, or DENIED |
-
-Denied attempts are logged too — if a Technician somehow triggers the server function, the log captures the attempt with the reason.
+1. Deploy `mock-device-server/` to Render or run locally with `flask run --port 5050`
+2. Create a Google Sheet, add the Apps Script files from `apps-script/`
+3. Run `seedAllTabs()` to populate sheet tabs, add your email to Users tab
+4. Deploy as web app
 
 ---
 
-## Deliberate Scope Cuts
+## Accessibility
 
-1. **No real Google Sheets API integration in the GitHub Pages demo** — The demo embeds data in JS for instant deployment. The Apps Script version reads from the actual Sheet.
-2. **No persistent login sessions in the demo** — Session is in-memory (JS variable). The Apps Script version uses Google's built-in session management.
-3. **No WebSocket for real-time updates** — Apps Script doesn't support WebSockets. In production, the Flask server would push device status changes via WebSocket to a React frontend.
-4. **Mock device server doesn't persist state** — `power_on` doesn't change the device's stored state between calls. A production system would maintain device state in a database.
-5. **No automated tests** — With more time, I'd add unit tests for payload validation and RBAC logic in both the Apps Script and Flask layers.
+- Skip-to-content link for keyboard navigation
+- `aria-label` on all interactive elements (buttons, inputs, dialog)
+- `aria-live="polite"` on toast notifications and error messages
+- `role="dialog"` and `aria-modal="true"` on command builder modal
+- Focus management: modal focuses first interactive element on open, returns focus on close
+- `role="menuitem"` on sidebar navigation items
+- Screen reader text on status badges (`sr-only` class)
+- Keyboard shortcut: `/` to focus search bar
+
+## Scope Cuts
+
+- No persistent sessions (in-memory JS variable)
+- No WebSocket for real-time device status
+- Mock device server doesn't persist state between calls
+- No automated tests
+- GitHub Pages demo simulates command dispatch in-memory (full-stack version does real HTTP)

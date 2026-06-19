@@ -6,10 +6,9 @@
 <title>NYU AV Command Center</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%2357068C'/><text x='1.5' y='12' font-size='10' font-weight='900' fill='white' font-family='Arial,sans-serif'>NYU</text></svg>">
 <style>
-/* === RESET & TOKENS === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --nyu:#57068C;--nyu-light:#7B2FBF;--nyu-dark:#3D0066;--nyu-pale:#f0e6f6;--nyu-faint:#f8f4fb;
+  --nyu:#57068C;--nyu-light:#7B2FBF;--nyu-pale:#f0e6f6;--nyu-faint:#f8f4fb;
   --green:#16a34a;--green-bg:#dcfce7;--green-border:#bbf7d0;
   --red:#dc2626;--red-bg:#fee2e2;--red-border:#fecaca;
   --amber:#d97706;--amber-bg:#fef3c7;--amber-border:#fde68a;
@@ -42,8 +41,8 @@
 }
 html{font-size:14px}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;cursor:default}
-button{cursor:pointer;font-family:inherit}
-input,select,textarea{cursor:text}
+button{cursor:pointer;font-family:inherit}input,select{cursor:text}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 
 /* === LOGIN === */
 #login{display:flex;align-items:center;justify-content:center;min-height:100vh}
@@ -51,54 +50,60 @@ input,select,textarea{cursor:text}
 .login-brand{margin-bottom:32px}
 .login-brand .nyu-logo{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:var(--nyu);border-radius:14px;margin-bottom:16px}
 .login-brand .nyu-logo svg{width:30px;height:30px;fill:#fff}
-.login-brand h1{font-size:20px;font-weight:800;color:var(--text-bright);letter-spacing:0.5px}
-.login-brand h1 span{color:var(--accent)}
+.login-brand h1{font-size:20px;font-weight:800;color:var(--text-bright)}.login-brand h1 span{color:var(--accent)}
 .login-brand p{font-size:13px;color:var(--text-dim);margin-top:4px}
 .login-card input{display:block;width:100%;padding:12px 14px;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none;transition:border .2s}
 .login-card input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
 .login-card input::placeholder{color:var(--text-dim)}
-.btn-login{width:100%;padding:12px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;transition:background .15s;margin-top:4px}
+.btn-login{width:100%;padding:12px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;margin-top:4px}
 .btn-login:hover{background:var(--nyu-light)}
 .login-error{color:var(--red);font-size:12px;margin-bottom:10px;min-height:17px}
 
-/* === DASHBOARD === */
+/* === TOPBAR === */
 #dash{display:none}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:var(--topbar-bg);color:var(--topbar-text)}
 .topbar-left{display:flex;align-items:center;gap:12px}
-.burger{background:none;border:none;color:inherit;font-size:20px;padding:4px 6px;border-radius:4px;display:flex;align-items:center}
+.burger{background:none;border:none;color:inherit;font-size:20px;padding:4px 6px;border-radius:4px;position:relative}
 .burger:hover{background:rgba(255,255,255,0.12)}
+.burger .notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--topbar-bg);display:none}
+.burger .notif-dot.show{display:block}
 .topbar-title{font-size:15px;font-weight:800;letter-spacing:0.5px}
 .topbar-right{display:flex;align-items:center;gap:12px}
 .topbar-clock{font-family:var(--mono);font-size:12px;opacity:0.75}
+.last-check{font-size:10px;opacity:0.6}
 .user-pill{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;background:rgba(255,255,255,0.12);border-radius:20px;font-size:12px}
 [data-theme="dark"] .user-pill{background:rgba(255,255,255,0.06)}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
 .role-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,0.15)}
-.btn-theme,.btn-out{padding:5px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:inherit;font-size:11px;font-weight:600;transition:all .15s}
+.btn-theme,.btn-out{padding:5px 10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-sm);color:inherit;font-size:11px;font-weight:600}
 .btn-theme:hover,.btn-out:hover{background:rgba(255,255,255,0.18)}
 
-/* === SIDEBAR MENU === */
+/* === SIDEBAR === */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50}
 .sidebar-overlay.open{display:block}
-.sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);border-right:1px solid var(--border);z-index:60;transition:left .25s ease;overflow-y:auto;box-shadow:var(--shadow-md)}
+.sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:var(--surface);border-right:1px solid var(--border);z-index:60;transition:left .25s ease;overflow-y:auto;box-shadow:var(--shadow-md);display:flex;flex-direction:column}
 .sidebar.open{left:0}
 .sidebar-head{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .sidebar-head h3{font-size:14px;font-weight:700;color:var(--text-bright)}
-.sidebar-close{background:none;border:none;font-size:18px;color:var(--text-dim);padding:4px}
-.sidebar-close:hover{color:var(--text)}
+.sidebar-close{background:none;border:none;font-size:18px;color:var(--text-dim);padding:4px}.sidebar-close:hover{color:var(--text)}
 .sidebar-section{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-dim);margin-top:8px}
-.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:background .1s;border:none;background:none;width:100%;text-align:left}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;border:none;background:none;width:100%;text-align:left}
 .sidebar-item:hover{background:var(--accent-faint)}
 .sidebar-item.active{background:var(--accent-pale);color:var(--accent);font-weight:700}
+.sidebar-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .sidebar-item .icon{width:18px;text-align:center;font-size:15px;opacity:0.7}
 .sidebar-user{padding:16px 20px;border-top:1px solid var(--border);margin-top:auto}
 .sidebar-user .name{font-size:13px;font-weight:600;color:var(--text-bright)}
 .sidebar-user .role{font-size:11px;color:var(--text-dim)}
 
-/* === CONTENT AREA === */
-.content{padding:20px 24px}
-.page{display:none}
-.page.active{display:block}
+/* === CONTENT === */
+.content{padding:20px 24px}.page{display:none}.page.active{display:block}
+
+/* === SEARCH === */
+.search-bar{display:flex;gap:8px;margin-bottom:14px}
+.search-input{flex:1;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none}
+.search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
+.search-input::placeholder{color:var(--text-dim)}
 
 /* === STATS === */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
@@ -109,35 +114,44 @@ input,select,textarea{cursor:text}
 .stat .val.g{color:var(--green)}.stat .val.b{color:var(--blue)}.stat .val.a{color:var(--amber)}
 .stat .sub{font-size:11px;color:var(--text-dim);margin-top:4px}
 
-/* === TECHNICIAN SHIFT CARD === */
+/* === SHIFT CARD === */
 .shift-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:24px}
 .shift-card .avatar-lg{width:52px;height:52px;border-radius:50%;background:var(--nyu);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex-shrink:0}
 [data-theme="dark"] .shift-card .avatar-lg{background:var(--accent)}
-.shift-card .info{flex:1}
-.shift-card .info h2{font-size:18px;font-weight:700;color:var(--text-bright)}
+.shift-card .info{flex:1}.shift-card .info h2{font-size:18px;font-weight:700;color:var(--text-bright)}
 .shift-card .info .meta{font-size:13px;color:var(--text-dim);margin-top:4px;display:flex;flex-wrap:wrap;gap:16px}
-.shift-card .info .meta span{display:inline-flex;align-items:center;gap:4px}
 .shift-card .summary{text-align:right;flex-shrink:0}
 .shift-card .summary .num{font-size:28px;font-weight:800;color:var(--accent)}
 .shift-card .summary .lbl{font-size:11px;color:var(--text-dim);text-transform:uppercase}
+
+/* === ALERTS === */
 .device-alert{margin-bottom:20px;padding:14px 18px;border-radius:var(--radius);font-size:13px;font-weight:600}
 .device-alert.all-good{background:var(--green-bg);color:var(--badge-green);border:1px solid var(--green-border)}
 .device-alert.has-issue{background:var(--red-bg);color:var(--badge-red);border:1px solid var(--red-border)}
 
 /* === PANELS & TABLES === */
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px}
-.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .panel-head h2{font-size:13px;font-weight:700;color:var(--text-bright)}
 .panel-head .count{font-size:11px;color:var(--text-dim);background:var(--bg);padding:3px 10px;border-radius:12px;font-weight:600}
+.panel-head .actions{display:flex;gap:6px}
+.btn-sm{padding:5px 10px;font-size:10px;font-weight:700;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text-dim);text-transform:uppercase;letter-spacing:0.3px}
+.btn-sm:hover{border-color:var(--accent);color:var(--accent)}
 .tbl-wrap{overflow-x:auto;max-height:460px;overflow-y:auto}
 .grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-@media(max-width:1080px){.grid-2col{grid-template-columns:1fr}}
 table{width:100%;border-collapse:collapse}
 th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-dim);background:var(--surface2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
 td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:12.5px;white-space:nowrap}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--accent-faint)}
+tr.data-row:hover td{background:var(--accent-faint);cursor:pointer}
 td strong{color:var(--text-bright);font-weight:600}
+
+/* === DEVICE DETAIL ROW === */
+.detail-row td{padding:0;background:var(--surface2);white-space:normal}
+.detail-content{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 24px;font-size:12px}
+.detail-content .df{}.df .dl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-dim);margin-bottom:2px}
+.df .dv{color:var(--text-bright);font-weight:500}
+.df .dv.mono{font-family:var(--mono);font-size:11px}
 
 /* === BADGES === */
 .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:10.5px;font-weight:700}
@@ -147,13 +161,11 @@ td strong{color:var(--text-bright);font-weight:600}
 .badge.standby,.badge.pending{background:var(--amber-bg);color:var(--badge-amber);border:1px solid var(--amber-border)}.badge.standby::before,.badge.pending::before{background:var(--amber)}
 .badge.on-site{background:var(--blue-bg);color:var(--badge-blue);border:1px solid var(--blue-border)}.badge.on-site::before{background:var(--blue)}
 
-/* === BUTTONS === */
-.btn-cmd{padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+/* === ACTION BUTTONS === */
+.btn-cmd{padding:6px 14px;border-radius:var(--radius-sm);font-size:11px;font-weight:700;border:none;display:inline-flex;align-items:center;gap:4px}
 .btn-cmd.active{background:var(--nyu);color:#fff}
 [data-theme="dark"] .btn-cmd.active{background:var(--accent)}
 .btn-cmd.active:hover{opacity:.85;transform:translateY(-1px)}
-.btn-cmd.locked{background:var(--border);color:var(--text-dim);cursor:not-allowed;position:relative}
-.btn-cmd.locked:hover::after{content:'Manager access required';position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);padding:5px 10px;border-radius:var(--radius-sm);font-size:10px;white-space:nowrap;z-index:10;box-shadow:var(--shadow-md)}
 .ip-cell{font-family:var(--mono);font-size:11.5px;color:var(--text-dim)}
 
 /* === MODAL === */
@@ -170,14 +182,15 @@ td strong{color:var(--text-bright);font-weight:600}
 .mf select{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;outline:none}
 .mf select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-pale)}
 .offline-warn{padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--radius-sm);font-size:12px;color:var(--red);margin-bottom:16px;display:none}
+.confirm-warn{padding:10px 14px;background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:var(--radius-sm);font-size:12px;color:var(--badge-amber);margin-bottom:16px;display:none}
 .preview-box{background:var(--log-bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:var(--mono);font-size:11px;color:var(--log-accent);white-space:pre;overflow-x:auto;max-height:200px;overflow-y:auto;line-height:1.5}
 .vol-row{display:flex;align-items:center;gap:12px;margin-top:6px}
 .vol-row input[type=range]{flex:1;accent-color:var(--accent)}
 .vol-num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;min-width:36px;text-align:right}
 .modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
-.btn-fire{padding:10px 24px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;transition:all .15s}
+.btn-fire{padding:10px 24px;background:var(--nyu);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700}
 [data-theme="dark"] .btn-fire{background:var(--accent)}
-.btn-fire:hover{opacity:.88;transform:translateY(-1px)}.btn-fire:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.btn-fire:hover{opacity:.88}.btn-fire:disabled{opacity:.35;cursor:not-allowed}
 
 /* === COMMAND LOG === */
 .cmdlog-body{max-height:240px;overflow-y:auto;padding:14px 18px;background:var(--log-bg);font-family:var(--mono);font-size:11.5px}
@@ -194,114 +207,106 @@ td strong{color:var(--text-bright);font-weight:600}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
 
 /* === TOAST === */
-.toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 18px;font-size:12px;font-weight:600;color:var(--green);z-index:200;transform:translateX(120%);transition:transform .3s ease;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:8px}
+.toast{position:fixed;top:20px;right:20px;background:var(--surface);border:1px solid var(--green-border);border-radius:var(--radius);padding:12px 18px;font-size:12px;font-weight:600;color:var(--green);z-index:200;transform:translateX(120%);transition:transform .3s ease;box-shadow:var(--shadow-md)}
 .toast.show{transform:translateX(0)}
-.toast svg{width:16px;height:16px;stroke:var(--green);fill:none;stroke-width:2.5}
 
 /* === RESPONSIVE === */
-@media(max-width:1080px){.stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.stats{grid-template-columns:1fr}.shift-card{flex-direction:column;text-align:center}.shift-card .summary{text-align:center}.shift-card .info .meta{justify-content:center}}
+@media(max-width:1080px){.stats{grid-template-columns:repeat(2,1fr)}.grid-2col{grid-template-columns:1fr}.detail-content{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.stats{grid-template-columns:1fr}.shift-card{flex-direction:column;text-align:center}.detail-content{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+<a href="#main-content" class="sr-only">Skip to main content</a>
 
-<!-- === LOGIN === -->
-<div id="login">
-  <div class="login-card">
+<!-- LOGIN -->
+<div id="login" role="main" aria-label="Login">
+  <div class="login-card" role="form" aria-label="Sign in to NYU AV Command Center">
     <div class="login-brand">
-      <div class="nyu-logo"><svg viewBox="0 0 24 24"><path d="M12 2C12 2 9 6 9 9c0 1.1.3 2.1.8 3H9v1h2v7h2v-7h2v-1h-.8c.5-.9.8-1.9.8-3 0-3-3-7-3-7zm0 2.5c.8 1.3 1.5 3 1.5 4.5 0 .8-.3 1.6-.7 2.2-.2.2-.5.5-.8.6-.3-.1-.6-.4-.8-.6-.4-.6-.7-1.4-.7-2.2 0-1.5.7-3.2 1.5-4.5z"/></svg></div>
+      <div class="nyu-logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2C12 2 9 6 9 9c0 1.1.3 2.1.8 3H9v1h2v7h2v-7h2v-1h-.8c.5-.9.8-1.9.8-3 0-3-3-7-3-7zm0 2.5c.8 1.3 1.5 3 1.5 4.5 0 .8-.3 1.6-.7 2.2-.2.2-.5.5-.8.6-.3-.1-.6-.4-.8-.6-.4-.6-.7-1.4-.7-2.2 0-1.5.7-3.2 1.5-4.5z"/></svg></div>
       <h1><span>NYU</span> AV Command Center</h1>
       <p>AV &amp; Media Services — Operations Dashboard</p>
     </div>
-    <div class="login-error" id="login-err"></div>
-    <input type="text" id="in-user" placeholder="Username" autocomplete="off" spellcheck="false">
-    <input type="password" id="in-pass" placeholder="Password">
+    <div class="login-error" id="login-err" role="alert" aria-live="polite"></div>
+    <input type="text" id="in-user" placeholder="Username" autocomplete="off" spellcheck="false" aria-label="Username">
+    <input type="password" id="in-pass" placeholder="Password" aria-label="Password">
     <button class="btn-login" id="btn-login">Sign In</button>
   </div>
 </div>
 
-<!-- === DASHBOARD === -->
+<!-- DASHBOARD -->
 <div id="dash">
-  <!-- Topbar -->
-  <div class="topbar">
+  <header class="topbar" role="banner">
     <div class="topbar-left">
-      <button class="burger" id="burger-btn">&#9776;</button>
+      <button class="burger" id="burger-btn" aria-label="Open navigation menu">&#9776;<span class="notif-dot" id="notif-dot"></span></button>
       <div class="topbar-title">NYU AV Command Center</div>
     </div>
     <div class="topbar-right">
-      <div class="topbar-clock" id="clock"></div>
-      <div class="user-pill"><div class="user-avatar" id="u-avatar"></div><span id="u-name"></span><span class="role-tag" id="u-role"></span></div>
-      <button class="btn-theme" id="btn-theme">&#9789;</button>
+      <div><div class="topbar-clock" id="clock"></div><div class="last-check" id="last-check"></div></div>
+      <div class="user-pill"><div class="user-avatar" id="u-avatar" aria-hidden="true"></div><span id="u-name"></span><span class="role-tag" id="u-role"></span></div>
+      <button class="btn-theme" id="btn-theme" aria-label="Toggle dark mode">&#9789;</button>
       <button class="btn-out" id="btn-out">Logout</button>
     </div>
-  </div>
+  </header>
 
-  <!-- Sidebar -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-head"><h3>Menu</h3><button class="sidebar-close" id="sidebar-close">&times;</button></div>
-    <div id="sidebar-menu"></div>
+  <nav class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-head"><h3>Menu</h3><button class="sidebar-close" id="sidebar-close" aria-label="Close menu">&times;</button></div>
+    <div id="sidebar-menu" role="menubar"></div>
     <div class="sidebar-user"><div class="name" id="sb-name"></div><div class="role" id="sb-role"></div></div>
   </nav>
 
-  <!-- Content -->
-  <div class="content">
-    <!-- TECHNICIAN: My Dashboard -->
+  <main class="content" id="main-content">
     <div class="page" id="page-tech-dash"></div>
-    <!-- TECHNICIAN: Staff On Shift -->
     <div class="page" id="page-tech-staff"></div>
-    <!-- TECHNICIAN: All Equipment (read-only) -->
     <div class="page" id="page-tech-equip"></div>
-    <!-- MANAGER: Dashboard -->
     <div class="page" id="page-mgr-dash"></div>
-    <!-- MANAGER: Staff Schedule -->
     <div class="page" id="page-mgr-staff"></div>
-    <!-- MANAGER: Command Log -->
     <div class="page" id="page-mgr-log"></div>
-  </div>
+  </main>
 </div>
 
-<!-- === MODAL === -->
-<div class="modal-wrap" id="modal-wrap">
+<!-- MODAL -->
+<div class="modal-wrap" id="modal-wrap" role="dialog" aria-modal="true" aria-label="Command Builder">
   <div class="modal">
-    <div class="modal-top"><h2>Command Builder</h2><button class="modal-x" id="modal-x">&times;</button></div>
+    <div class="modal-top"><h2>Command Builder</h2><button class="modal-x" id="modal-x" aria-label="Close dialog">&times;</button></div>
     <div class="modal-body">
       <div class="mf"><div class="mf-label">Target Device</div><div class="mf-value" id="m-dev"></div></div>
       <div class="mf"><div class="mf-label">IP Address</div><div class="mf-value ip-cell" id="m-ip"></div></div>
-      <div class="offline-warn" id="m-warn">Device is currently Offline — command will be queued.</div>
-      <div class="mf"><div class="mf-label">Command</div><select id="m-cmd"><option value="power_on">power_on</option><option value="power_off">power_off</option><option value="reboot">reboot</option><option value="mute_audio">mute_audio</option><option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option><option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option></select></div>
-      <div class="mf" id="vol-grp" style="display:none"><div class="mf-label">Volume Level</div><div class="vol-row"><input type="range" id="m-vol" min="0" max="100" value="50"><div class="vol-num"><span id="vol-v">50</span>%</div></div></div>
-      <div class="mf"><div class="mf-label">Payload Preview</div><div class="preview-box" id="m-preview"></div></div>
+      <div class="offline-warn" id="m-warn" role="alert">Device is currently Offline — command will be queued.</div>
+      <div class="confirm-warn" id="m-confirm" role="alert">This is a destructive command. Click "Fire Command" to confirm.</div>
+      <div class="mf"><div class="mf-label" id="cmd-label">Command</div><select id="m-cmd" aria-labelledby="cmd-label"><option value="power_on">power_on</option><option value="power_off">power_off</option><option value="reboot">reboot</option><option value="mute_audio">mute_audio</option><option value="unmute_audio">unmute_audio</option><option value="switch_input_hdmi">switch_input_hdmi</option><option value="switch_input_vga">switch_input_vga</option><option value="set_volume">set_volume</option></select></div>
+      <div class="mf" id="vol-grp" style="display:none"><div class="mf-label">Volume Level</div><div class="vol-row"><input type="range" id="m-vol" min="0" max="100" value="50" aria-label="Volume level"><div class="vol-num"><span id="vol-v">50</span>%</div></div></div>
+      <div class="mf"><div class="mf-label">Payload Preview</div><div class="preview-box" id="m-preview" role="log" aria-label="JSON payload preview"></div></div>
     </div>
     <div class="modal-foot"><button class="btn-fire" id="btn-fire">Fire Command</button></div>
   </div>
 </div>
-<div class="toast" id="toast"><svg viewBox="0 0 24 24" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-msg"></span></div>
 
 <script>
 // ============================================================================
 // NYU AV COMMAND CENTER
 // ============================================================================
 
-// === AUTHENTICATION — Demo only (NOT for production) ===
+// === AUTH — Demo only (NOT for production) ===
 const CREDS = [
   { username: "technician", password: "tech123", role: "technician", name: "Alex Rivera" },
   { username: "manager",    password: "mgr456",  role: "manager",    name: "Jordan Lee" }
 ];
-let session = null, pendingCount = 0, activeEqId = null, currentPage = null;
+let session = null, pendingCount = 0, activeEqId = null, currentPage = null, commandLog = [], lastCheckTime = Date.now();
 
 // === Spreadsheet A: AV Equipment Inventory | Source: data/equipment-inventory.csv ===
 const EQUIPMENT = [
-  { id:"EQ-001", device_name:"Crestron DM-NVX-350",     device_type:"Video Switcher",    building:"Bobst Library",               room:"LL1-03", ip_address:"10.18.4.101", status:"Online",  assigned_tech:"Alex Rivera" },
-  { id:"EQ-002", device_name:"Biamp Tesira SERVER-IO",   device_type:"DSP",               building:"Kimmel Center",               room:"802",    ip_address:"10.18.6.55",  status:"Online",  assigned_tech:"Sam Patel" },
-  { id:"EQ-003", device_name:"Epson Pro L1755U",         device_type:"Projector",         building:"Stern School of Business",    room:"310",    ip_address:"10.18.8.22",  status:"Standby", assigned_tech:"Jordan Lee" },
-  { id:"EQ-004", device_name:"QSC Q-SYS Core 110f",     device_type:"DSP",               building:"Tandon School of Engineering",room:"LC-400", ip_address:"10.19.2.10",  status:"Online",  assigned_tech:"Alex Rivera" },
-  { id:"EQ-005", device_name:"Extron SW4 HD 4K PLUS",   device_type:"Video Switcher",    building:"Silver Center",               room:"503",    ip_address:"10.18.3.88",  status:"Offline", assigned_tech:"Priya Nair" },
-  { id:"EQ-006", device_name:"Samsung QM85R-B",          device_type:"Display",           building:"Courant Institute",           room:"109",    ip_address:"10.18.5.130", status:"Online",  assigned_tech:"Sam Patel" },
-  { id:"EQ-007", device_name:"Shure MXA920 Ceiling Mic", device_type:"Microphone System", building:"Tisch School of the Arts",    room:"B-50",   ip_address:"10.18.7.201", status:"Online",  assigned_tech:"Casey Lin" },
-  { id:"EQ-008", device_name:"Christie DWU850-GS",       device_type:"Projector",         building:"Palladium Athletic Facility", room:"Gym-A",  ip_address:"10.18.9.15",  status:"Standby", assigned_tech:"Jordan Lee" },
-  { id:"EQ-009", device_name:"Sennheiser TeamConnect",   device_type:"Microphone System", building:"Bobst Library",               room:"619",    ip_address:"10.18.4.175", status:"Online",  assigned_tech:"Priya Nair" },
-  { id:"EQ-010", device_name:"LG LSAB012-M4 LED Wall",  device_type:"Display",           building:"Kimmel Center",               room:"Lobby",  ip_address:"10.18.6.240", status:"Offline", assigned_tech:"Casey Lin" }
+  { id:"EQ-001", device_name:"Crestron DM-NVX-350",     device_type:"Video Switcher",    building:"Bobst Library",               room:"LL1-03", floor:"LL1", ip_address:"10.18.4.101", status:"Online",  last_ping:"2026-06-18 09:42:11", firmware:"6.0.1.34",  assigned_tech:"Alex Rivera",  notes:"Main AV distribution hub for LL1 lecture hall" },
+  { id:"EQ-002", device_name:"Biamp Tesira SERVER-IO",   device_type:"DSP",               building:"Kimmel Center",               room:"802",    floor:"8",   ip_address:"10.18.6.55",  status:"Online",  last_ping:"2026-06-18 09:41:58", firmware:"4.12.0",    assigned_tech:"Sam Patel",    notes:"Audio routing for 8th floor event spaces" },
+  { id:"EQ-003", device_name:"Epson Pro L1755U",         device_type:"Projector",         building:"Stern School of Business",    room:"310",    floor:"3",   ip_address:"10.18.8.22",  status:"Standby", last_ping:"2026-06-18 08:15:30", firmware:"1.04",      assigned_tech:"Jordan Lee",   notes:"15000 lumen laser — room 310 main display" },
+  { id:"EQ-004", device_name:"QSC Q-SYS Core 110f",     device_type:"DSP",               building:"Tandon School of Engineering",room:"LC-400", floor:"4",   ip_address:"10.19.2.10",  status:"Online",  last_ping:"2026-06-18 09:43:01", firmware:"9.10.1",    assigned_tech:"Alex Rivera",  notes:"Core processor for lecture capture system" },
+  { id:"EQ-005", device_name:"Extron SW4 HD 4K PLUS",   device_type:"Video Switcher",    building:"Silver Center",               room:"503",    floor:"5",   ip_address:"10.18.3.88",  status:"Offline", last_ping:"2026-06-17 22:10:44", firmware:"1.03.0001", assigned_tech:"Priya Nair",   notes:"ALERT: Offline since 6/17 — ticket #AV-2891" },
+  { id:"EQ-006", device_name:"Samsung QM85R-B",          device_type:"Display",           building:"Courant Institute",           room:"109",    floor:"1",   ip_address:"10.18.5.130", status:"Online",  last_ping:"2026-06-18 09:40:05", firmware:"1220.5",    assigned_tech:"Sam Patel",    notes:"85-inch 4K — lobby digital signage" },
+  { id:"EQ-007", device_name:"Shure MXA920 Ceiling Mic", device_type:"Microphone System", building:"Tisch School of the Arts",    room:"B-50",   floor:"B",   ip_address:"10.18.7.201", status:"Online",  last_ping:"2026-06-18 09:42:47", firmware:"5.1.14",    assigned_tech:"Casey Lin",    notes:"Ceiling array — black box theater" },
+  { id:"EQ-008", device_name:"Christie DWU850-GS",       device_type:"Projector",         building:"Palladium Athletic Facility", room:"Gym-A",  floor:"1",   ip_address:"10.18.9.15",  status:"Standby", last_ping:"2026-06-18 07:55:00", firmware:"1.8.0",     assigned_tech:"Jordan Lee",   notes:"Event projector — powered on for scheduled events" },
+  { id:"EQ-009", device_name:"Sennheiser TeamConnect",   device_type:"Microphone System", building:"Bobst Library",               room:"619",    floor:"6",   ip_address:"10.18.4.175", status:"Online",  last_ping:"2026-06-18 09:43:12", firmware:"1.12.0",    assigned_tech:"Priya Nair",   notes:"Conference room ceiling mic — Dante networked" },
+  { id:"EQ-010", device_name:"LG LSAB012-M4 LED Wall",  device_type:"Display",           building:"Kimmel Center",               room:"Lobby",  floor:"1",   ip_address:"10.18.6.240", status:"Offline", last_ping:"2026-06-16 18:30:22", firmware:"04.02.10",  assigned_tech:"Casey Lin",    notes:"ALERT: LED controller unresponsive" }
 ];
 
 // === Spreadsheet B: Staff Shift Schedules | Source: data/staff-schedules.csv ===
@@ -316,18 +321,11 @@ const STAFF = [
   { id:"ST-008", staff_name:"Riley Chen",    role:"AV Technician",   shift_date:"2026-06-19", shift_start:"08:00", shift_end:"16:00", location:"Courant Institute",           status:"Confirmed" }
 ];
 
-// === DOM CACHE ===
+const DESTRUCTIVE_CMDS = ['power_off', 'reboot'];
+
+// === DOM ===
 const $ = id => document.getElementById(id);
-const dom = {
-  login:$('login'), dash:$('dash'), inUser:$('in-user'), inPass:$('in-pass'), loginErr:$('login-err'),
-  btnLogin:$('btn-login'), btnOut:$('btn-out'), btnTheme:$('btn-theme'), clock:$('clock'),
-  uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'),
-  burgerBtn:$('burger-btn'), sidebar:$('sidebar'), sidebarOverlay:$('sidebar-overlay'),
-  sidebarClose:$('sidebar-close'), sidebarMenu:$('sidebar-menu'), sbName:$('sb-name'), sbRole:$('sb-role'),
-  modalWrap:$('modal-wrap'), modalX:$('modal-x'), mDev:$('m-dev'), mIp:$('m-ip'),
-  mWarn:$('m-warn'), mCmd:$('m-cmd'), volGrp:$('vol-grp'), mVol:$('m-vol'), volV:$('vol-v'),
-  mPreview:$('m-preview'), btnFire:$('btn-fire'), toast:$('toast'), toastMsg:$('toast-msg')
-};
+const dom = { login:$('login'), dash:$('dash'), inUser:$('in-user'), inPass:$('in-pass'), loginErr:$('login-err'), btnLogin:$('btn-login'), btnOut:$('btn-out'), btnTheme:$('btn-theme'), clock:$('clock'), lastCheck:$('last-check'), uAvatar:$('u-avatar'), uName:$('u-name'), uRole:$('u-role'), burgerBtn:$('burger-btn'), notifDot:$('notif-dot'), sidebar:$('sidebar'), sidebarOverlay:$('sidebar-overlay'), sidebarClose:$('sidebar-close'), sidebarMenu:$('sidebar-menu'), sbName:$('sb-name'), sbRole:$('sb-role'), modalWrap:$('modal-wrap'), modalX:$('modal-x'), mDev:$('m-dev'), mIp:$('m-ip'), mWarn:$('m-warn'), mConfirm:$('m-confirm'), mCmd:$('m-cmd'), volGrp:$('vol-grp'), mVol:$('m-vol'), volV:$('vol-v'), mPreview:$('m-preview'), btnFire:$('btn-fire'), toast:$('toast'), toastMsg:$('toast-msg') };
 
 // === HELPERS ===
 const pad = n => String(n).padStart(2,'0');
@@ -335,41 +333,30 @@ const fmtTime = () => { const d=new Date(); return `${pad(d.getHours())}:${pad(d
 const fmtDate = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 const fmtFull = () => `${fmtDate()} ${fmtTime()}`;
 const isoNow = () => new Date().toISOString();
-const badgeHtml = s => `<span class="badge ${s.toLowerCase().replace(' ','-')}">${s}</span>`;
-setInterval(() => { dom.clock.textContent = fmtTime(); }, 1000);
+const badgeHtml = s => `<span class="badge ${s.toLowerCase().replace(' ','-')}"><span class="sr-only">Status: </span>${s}</span>`;
+
+// === CLOCK + LAST CHECK ===
+function tickClock() {
+  dom.clock.textContent = fmtTime();
+  const ago = Math.floor((Date.now() - lastCheckTime) / 1000);
+  dom.lastCheck.textContent = ago < 5 ? 'System check: just now' : `Last check: ${ago}s ago`;
+}
+setInterval(tickClock, 1000);
+setInterval(() => { lastCheckTime = Date.now(); }, 30000); // simulated refresh every 30s
 
 // === SIDEBAR ===
-function openSidebar() { dom.sidebar.classList.add('open'); dom.sidebarOverlay.classList.add('open'); }
-function closeSidebar() { dom.sidebar.classList.remove('open'); dom.sidebarOverlay.classList.remove('open'); }
-
-// === NAV — build menu items per role, switch pages ===
+function openSidebar() { dom.sidebar.classList.add('open'); dom.sidebarOverlay.classList.add('open'); dom.sidebarClose.focus(); }
+function closeSidebar() { dom.sidebar.classList.remove('open'); dom.sidebarOverlay.classList.remove('open'); dom.burgerBtn.focus(); }
 const MENUS = {
-  technician: [
-    { id: 'page-tech-dash',  label: 'My Dashboard',   icon: '&#9673;' },
-    { id: 'page-tech-staff', label: 'Staff On Shift',  icon: '&#9823;' },
-    { id: 'page-tech-equip', label: 'All Equipment',   icon: '&#9881;' }
-  ],
-  manager: [
-    { id: 'page-mgr-dash',  label: 'Dashboard',       icon: '&#9673;' },
-    { id: 'page-mgr-staff', label: 'Staff Schedule',   icon: '&#9823;' },
-    { id: 'page-mgr-log',   label: 'Command Log',      icon: '&#9783;' }
-  ]
+  technician: [ { id:'page-tech-dash', label:'My Dashboard', icon:'&#9673;' }, { id:'page-tech-staff', label:'Staff On Shift', icon:'&#9823;' }, { id:'page-tech-equip', label:'All Equipment', icon:'&#9881;' } ],
+  manager: [ { id:'page-mgr-dash', label:'Dashboard', icon:'&#9673;' }, { id:'page-mgr-staff', label:'Staff Schedule', icon:'&#9823;' }, { id:'page-mgr-log', label:'Command Log', icon:'&#9783;' } ]
 };
-
 function buildSidebar() {
   const items = MENUS[session.role];
-  dom.sidebarMenu.innerHTML =
-    '<div class="sidebar-section">Navigation</div>' +
-    items.map(m =>
-      `<button class="sidebar-item" data-page="${m.id}"><span class="icon">${m.icon}</span>${m.label}</button>`
-    ).join('');
-  dom.sidebarMenu.querySelectorAll('.sidebar-item').forEach(btn => {
-    btn.addEventListener('click', () => { navigateTo(btn.dataset.page); closeSidebar(); });
-  });
-  dom.sbName.textContent = session.name;
-  dom.sbRole.textContent = session.role === 'manager' ? 'Manager' : 'Technician';
+  dom.sidebarMenu.innerHTML = '<div class="sidebar-section">Navigation</div>' + items.map(m => `<button class="sidebar-item" data-page="${m.id}" role="menuitem"><span class="icon" aria-hidden="true">${m.icon}</span>${m.label}</button>`).join('');
+  dom.sidebarMenu.querySelectorAll('.sidebar-item').forEach(btn => btn.addEventListener('click', () => { navigateTo(btn.dataset.page); closeSidebar(); }));
+  dom.sbName.textContent = session.name; dom.sbRole.textContent = session.role === 'manager' ? 'Manager' : 'Technician';
 }
-
 function navigateTo(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   $(pageId).classList.add('active');
@@ -377,27 +364,73 @@ function navigateTo(pageId) {
   currentPage = pageId;
 }
 
+// === SEARCH FILTER ===
+function attachSearch(inputId, tableId) {
+  const input = $(inputId); if (!input) return;
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase();
+    $(tableId).querySelectorAll('tr.data-row').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+      const detail = row.nextElementSibling;
+      if (detail && detail.classList.contains('detail-row')) detail.style.display = row.style.display;
+    });
+  });
+}
+
+// === DEVICE DETAIL TOGGLE ===
+function toggleDetail(rowEl, eq) {
+  const next = rowEl.nextElementSibling;
+  if (next && next.classList.contains('detail-row')) { next.remove(); return; }
+  const tr = document.createElement('tr');
+  tr.className = 'detail-row';
+  tr.innerHTML = `<td colspan="99"><div class="detail-content">
+    <div class="df"><div class="dl">Device ID</div><div class="dv mono">${eq.id}</div></div>
+    <div class="df"><div class="dl">Building / Room / Floor</div><div class="dv">${eq.building}, ${eq.room}, Floor ${eq.floor}</div></div>
+    <div class="df"><div class="dl">IP Address</div><div class="dv mono">${eq.ip_address}</div></div>
+    <div class="df"><div class="dl">Firmware</div><div class="dv mono">${eq.firmware}</div></div>
+    <div class="df"><div class="dl">Last Ping</div><div class="dv">${eq.last_ping}</div></div>
+    <div class="df"><div class="dl">Assigned Tech</div><div class="dv">${eq.assigned_tech}</div></div>
+    <div class="df" style="grid-column:1/-1"><div class="dl">Notes</div><div class="dv">${eq.notes}</div></div>
+  </div></td>`;
+  rowEl.after(tr);
+}
+
+// === NOTIFICATION DOT ===
+function updateNotifDot() {
+  const myDevices = session.role === 'technician' ? EQUIPMENT.filter(e => e.assigned_tech === session.name) : EQUIPMENT;
+  const hasOffline = myDevices.some(d => d.status === 'Offline');
+  dom.notifDot.classList.toggle('show', hasOffline);
+}
+
+// === EXPORT LOG CSV ===
+function exportLogCSV() {
+  if (commandLog.length === 0) return;
+  const header = 'timestamp,device_name,device_id,ip_address,command,status\n';
+  const rows = commandLog.map(l => `"${l.time}","${l.dev.device_name}","${l.dev.id}","${l.dev.ip_address}","${l.payload.command.action}","dispatched"`).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `command-log-${fmtDate()}.csv`; a.click();
+}
+
 // === AUTH ===
 function doLogin() {
   const u = dom.inUser.value.trim(), p = dom.inPass.value;
   const match = CREDS.find(c => c.username === u && c.password === p);
   if (!match) { dom.loginErr.textContent = 'Invalid credentials'; dom.inPass.value = ''; return; }
-  session = { ...match }; dom.loginErr.textContent = ''; initDash();
+  session = { ...match }; dom.loginErr.textContent = ''; lastCheckTime = Date.now(); initDash();
 }
 function doLogout() {
-  session = null; pendingCount = 0;
+  session = null; pendingCount = 0; commandLog = [];
   dom.login.style.display = 'flex'; dom.dash.style.display = 'none';
   dom.inUser.value = ''; dom.inPass.value = '';
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.innerHTML = ''; });
 }
 
-// === INIT DASHBOARD ===
+// === INIT ===
 function initDash() {
   dom.login.style.display = 'none'; dom.dash.style.display = 'block';
-  dom.uName.textContent = session.name;
-  dom.uRole.textContent = session.role;
+  dom.uName.textContent = session.name; dom.uRole.textContent = session.role;
   dom.uAvatar.textContent = session.name.split(' ').map(w => w[0]).join('');
-  buildSidebar();
+  buildSidebar(); updateNotifDot(); tickClock();
   if (session.role === 'technician') { renderTechDash(); renderTechStaff(); renderTechEquip(); navigateTo('page-tech-dash'); }
   else { renderMgrDash(); renderMgrStaff(); renderMgrLog(); navigateTo('page-mgr-dash'); }
 }
@@ -408,157 +441,95 @@ function renderTechDash() {
   const myDevices = EQUIPMENT.filter(e => e.assigned_tech === session.name);
   const offlineCount = myDevices.filter(d => d.status === 'Offline').length;
   const page = $('page-tech-dash');
-
-  let shiftHtml = '';
-  if (myShift) {
-    shiftHtml = `<div class="shift-card">
-      <div class="avatar-lg">${session.name.split(' ').map(w=>w[0]).join('')}</div>
-      <div class="info">
-        <h2>${session.name}</h2>
-        <div class="meta">
-          <span>${myShift.role}</span>
-          <span>${myShift.shift_start} – ${myShift.shift_end}</span>
-          <span>${myShift.location}</span>
-          <span>${badgeHtml(myShift.status)}</span>
-        </div>
-      </div>
-      <div class="summary"><div class="num">${myDevices.length}</div><div class="lbl">Devices Assigned</div></div>
-    </div>`;
-  }
-
-  const alertHtml = offlineCount === 0
-    ? `<div class="device-alert all-good">All ${myDevices.length} assigned devices are online.</div>`
-    : `<div class="device-alert has-issue">${offlineCount} device${offlineCount > 1 ? 's' : ''} offline — needs attention.</div>`;
-
-  const tableHtml = `<div class="panel">
-    <div class="panel-head"><h2>Your Assigned Devices</h2><div class="count">${myDevices.length} devices</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th></tr></thead>
-    <tbody>${myDevices.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
-
-  page.innerHTML = shiftHtml + alertHtml + tableHtml;
+  let h = '';
+  if (myShift) h += `<div class="shift-card"><div class="avatar-lg" aria-hidden="true">${session.name.split(' ').map(w=>w[0]).join('')}</div><div class="info"><h2>${session.name}</h2><div class="meta"><span>${myShift.role}</span><span>${myShift.shift_start} – ${myShift.shift_end}</span><span>${myShift.location}</span><span>${badgeHtml(myShift.status)}</span></div></div><div class="summary"><div class="num">${myDevices.length}</div><div class="lbl">Devices Assigned</div></div></div>`;
+  h += offlineCount === 0 ? `<div class="device-alert all-good" role="status">All ${myDevices.length} assigned devices are online.</div>` : `<div class="device-alert has-issue" role="alert">${offlineCount} device${offlineCount>1?'s':''} offline — needs attention.</div>`;
+  h += `<div class="panel"><div class="panel-head"><h2>Your Assigned Devices</h2><div class="count">${myDevices.length} devices</div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th></tr></thead><tbody id="tech-my-tb">${myDevices.map(eq => `<tr class="data-row" data-eqid="${eq.id}"><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  page.innerHTML = h;
+  page.querySelectorAll('.data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
 }
-
 function renderTechStaff() {
-  const today = fmtDate();
-  const todayStaff = STAFF.filter(s => s.shift_date === today);
-  const page = $('page-tech-staff');
-  page.innerHTML = `<div class="panel">
-    <div class="panel-head"><h2>Staff On Shift Today</h2><div class="count">${todayStaff.length} staff</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
-    <tbody>${todayStaff.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const today = fmtDate(); const todayStaff = STAFF.filter(s => s.shift_date === today);
+  $('page-tech-staff').innerHTML = `<div class="search-bar"><input class="search-input" id="search-tstaff" placeholder="Search by name, role, location..." aria-label="Filter staff"></div><div class="panel"><div class="panel-head"><h2>Staff On Shift Today</h2><div class="count">${todayStaff.length} staff</div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="tstaff-tb">${todayStaff.map(s => `<tr class="data-row"><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  attachSearch('search-tstaff', 'tstaff-tb');
 }
-
 function renderTechEquip() {
-  const page = $('page-tech-equip');
-  page.innerHTML = `<div class="panel">
-    <div class="panel-head"><h2>All Equipment (Read-Only)</h2><div class="count">${EQUIPMENT.length} devices</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Assigned To</th></tr></thead>
-    <tbody>${EQUIPMENT.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td>${eq.assigned_tech}</td></tr>`).join('')}</tbody></table></div></div>`;
+  $('page-tech-equip').innerHTML = `<div class="search-bar"><input class="search-input" id="search-teq" placeholder="Search by device, type, building, IP..." aria-label="Filter equipment"></div><div class="panel"><div class="panel-head"><h2>All Equipment (Read-Only)</h2><div class="count">${EQUIPMENT.length} devices</div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Assigned To</th></tr></thead><tbody id="teq-tb">${EQUIPMENT.map(eq => `<tr class="data-row" data-eqid="${eq.id}"><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td>${eq.assigned_tech}</td></tr>`).join('')}</tbody></table></div></div>`;
+  attachSearch('search-teq', 'teq-tb');
+  $('teq-tb').querySelectorAll('.data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
 }
 
 // === MANAGER VIEWS ===
 function renderMgrDash() {
-  const online = EQUIPMENT.filter(e => e.status === 'Online').length;
-  const offline = EQUIPMENT.filter(e => e.status === 'Offline').length;
-  const today = fmtDate();
-  const activeStaff = STAFF.filter(s => s.shift_date === today && s.status !== 'Pending').length;
-  const onSite = STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length;
+  const online = EQUIPMENT.filter(e => e.status === 'Online').length, offline = EQUIPMENT.filter(e => e.status === 'Offline').length;
+  const today = fmtDate(), activeStaff = STAFF.filter(s => s.shift_date === today && s.status !== 'Pending').length, onSite = STAFF.filter(s => s.shift_date === today && s.status === 'On-Site').length;
   const page = $('page-mgr-dash');
-
-  const statsHtml = `<div class="stats">
-    <div class="stat"><div class="label">Total Equipment</div><div class="val">${EQUIPMENT.length}</div><div class="sub">Across 8 buildings</div></div>
-    <div class="stat"><div class="label">Online Devices</div><div class="val g">${online}</div><div class="sub">${offline} offline, ${EQUIPMENT.length - online - offline} standby</div></div>
-    <div class="stat"><div class="label">Active Staff</div><div class="val b">${activeStaff}</div><div class="sub">${onSite} on-site now</div></div>
-    <div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">${pendingCount}</div><div class="sub">This session</div></div>
-  </div>`;
-
-  const equipHtml = `<div class="panel">
-    <div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count">${EQUIPMENT.length} devices</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>IP</th><th>Status</th><th>Action</th></tr></thead>
-    <tbody>${EQUIPMENT.map(eq => `<tr><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td class="ip-cell">${eq.ip_address}</td><td>${badgeHtml(eq.status)}</td><td><button class="btn-cmd active" data-id="${eq.id}">Command</button></td></tr>`).join('')}</tbody></table></div></div>`;
-
-  const staffHtml = `<div class="panel">
-    <div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
-    <tbody>${STAFF.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
-
-  const logHtml = `<div class="panel">
-    <div class="panel-head"><h2>Command Log</h2><div style="display:flex;align-items:center;gap:8px"><div class="live-dot" id="live-dot"></div><div class="count" id="log-count">0 commands</div></div></div>
-    <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands...</div></div></div>`;
-
-  page.innerHTML = statsHtml + `<div class="grid-2col">${equipHtml}${staffHtml}</div>` + logHtml;
-  page.querySelectorAll('.btn-cmd.active').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
+  const offlineAlert = offline > 0 ? `<div class="device-alert has-issue" role="alert">${offline} device${offline>1?'s':''} currently offline — requires attention.</div>` : '';
+  page.innerHTML = `<div class="stats"><div class="stat"><div class="label">Total Equipment</div><div class="val">${EQUIPMENT.length}</div><div class="sub">Across 8 buildings</div></div><div class="stat"><div class="label">Online Devices</div><div class="val g">${online}</div><div class="sub">${offline} offline, ${EQUIPMENT.length-online-offline} standby</div></div><div class="stat"><div class="label">Active Staff</div><div class="val b">${activeStaff}</div><div class="sub">${onSite} on-site now</div></div><div class="stat"><div class="label">Pending Commands</div><div class="val a" id="s-pending">${pendingCount}</div><div class="sub">This session</div></div></div>${offlineAlert}<div class="search-bar"><input class="search-input" id="search-meq" placeholder="Search equipment by name, type, building, IP..." aria-label="Filter equipment"></div><div class="grid-2col"><div class="panel"><div class="panel-head"><h2>AV Equipment Inventory</h2><div class="count">${EQUIPMENT.length} devices</div></div><div class="tbl-wrap"><table><thead><tr><th>Device</th><th>Type</th><th>Location</th><th>Status</th><th>Action</th></tr></thead><tbody id="meq-tb">${EQUIPMENT.map(eq => `<tr class="data-row" data-eqid="${eq.id}"><td><strong>${eq.device_name}</strong></td><td>${eq.device_type}</td><td>${eq.building}, ${eq.room}</td><td>${badgeHtml(eq.status)}</td><td><button class="btn-cmd active" data-id="${eq.id}" aria-label="Send command to ${eq.device_name}">Command</button></td></tr>`).join('')}</tbody></table></div></div><div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody>${STAFF.map(s => `<tr class="data-row"><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div></div><div class="panel"><div class="panel-head"><h2>Command Log</h2><div style="display:flex;align-items:center;gap:8px"><div class="live-dot" id="live-dot"></div><div class="count" id="log-count">0 commands</div><div class="actions"><button class="btn-sm" id="btn-export" aria-label="Export command log as CSV">Export CSV</button></div></div></div><div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands...</div></div></div>`;
+  attachSearch('search-meq', 'meq-tb');
+  page.querySelectorAll('.btn-cmd.active').forEach(b => { b.addEventListener('click', ev => { ev.stopPropagation(); openModal(b.dataset.id); }); });
+  page.querySelectorAll('#meq-tb .data-row').forEach(row => row.addEventListener('click', () => toggleDetail(row, EQUIPMENT.find(e => e.id === row.dataset.eqid))));
+  const exportBtn = $('btn-export'); if (exportBtn) exportBtn.addEventListener('click', exportLogCSV);
 }
-
 function renderMgrStaff() {
-  const page = $('page-mgr-staff');
-  page.innerHTML = `<div class="panel">
-    <div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead>
-    <tbody>${STAFF.map(s => `<tr><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_date}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  $('page-mgr-staff').innerHTML = `<div class="search-bar"><input class="search-input" id="search-mstaff" placeholder="Search by name, role, location..." aria-label="Filter staff"></div><div class="panel"><div class="panel-head"><h2>Staff Shift Schedule</h2><div class="count">${STAFF.length} entries</div></div><div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Role</th><th>Date</th><th>Shift</th><th>Location</th><th>Status</th></tr></thead><tbody id="mstaff-tb">${STAFF.map(s => `<tr class="data-row"><td><strong>${s.staff_name}</strong></td><td>${s.role}</td><td>${s.shift_date}</td><td>${s.shift_start} – ${s.shift_end}</td><td>${s.location}</td><td>${badgeHtml(s.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  attachSearch('search-mstaff', 'mstaff-tb');
 }
-
 function renderMgrLog() {
-  const page = $('page-mgr-log');
-  page.innerHTML = `<div class="panel">
-    <div class="panel-head"><h2>Command Log</h2><div style="display:flex;align-items:center;gap:8px"><div class="live-dot" id="live-dot"></div><div class="count" id="log-count">0 commands</div></div></div>
-    <div class="cmdlog-body" id="log-body"><div class="log-empty">Awaiting dispatched commands...</div></div></div>`;
+  $('page-mgr-log').innerHTML = `<div class="panel"><div class="panel-head"><h2>Command Log (Full View)</h2><div style="display:flex;align-items:center;gap:8px"><div class="count" id="log-count2">${commandLog.length} commands</div><div class="actions"><button class="btn-sm" id="btn-export2">Export CSV</button></div></div></div><div class="cmdlog-body" id="log-body2">${commandLog.length === 0 ? '<div class="log-empty">No commands dispatched.</div>' : commandLog.map(l => logEntryHtml(l)).join('')}</div></div>`;
+  const btn = $('btn-export2'); if (btn) btn.addEventListener('click', exportLogCSV);
+  $('log-body2').querySelectorAll('.log-entry').forEach(el => el.addEventListener('click', () => el.classList.toggle('open')));
 }
 
-// === COMMAND MODAL ===
+// === MODAL ===
 function openModal(eqId) {
-  // RBAC: role check — technician blocked from command dispatch
-  if (!session || session.role !== 'manager') return;
-  const dev = EQUIPMENT.find(e => e.id === eqId);
-  if (!dev) return;
+  if (!session || session.role !== 'manager') return; // RBAC: server-side check
+  const dev = EQUIPMENT.find(e => e.id === eqId); if (!dev) return;
   activeEqId = eqId;
   dom.mDev.textContent = `${dev.device_name}  ·  ${dev.device_type}`;
   dom.mIp.textContent = dev.ip_address;
   dom.mWarn.style.display = dev.status === 'Offline' ? 'block' : 'none';
-  dom.mCmd.value = 'power_on'; dom.volGrp.style.display = 'none';
+  dom.mCmd.value = 'power_on'; dom.volGrp.style.display = 'none'; dom.mConfirm.style.display = 'none';
   dom.mVol.value = 50; dom.volV.textContent = '50';
   dom.btnFire.disabled = false; updatePreview();
-  dom.modalWrap.classList.add('open');
+  dom.modalWrap.classList.add('open'); dom.mCmd.focus();
 }
 function closeModal() { dom.modalWrap.classList.remove('open'); activeEqId = null; }
 function buildPayload() {
-  const dev = EQUIPMENT.find(e => e.id === activeEqId);
-  if (!dev) return {};
+  const dev = EQUIPMENT.find(e => e.id === activeEqId); if (!dev) return {};
   const cmd = dom.mCmd.value;
   const params = cmd === 'set_volume' ? { level: parseInt(dom.mVol.value,10), unit: "percent" } : {};
-  return { api_version:"1.0", timestamp:isoNow(), issued_by:{ user:session.username, role:"manager" },
-    target_device:{ device_id:dev.id, device_name:dev.device_name, device_type:dev.device_type, ip_address:dev.ip_address, location:{ building:dev.building, room:dev.room } },
-    command:{ action:cmd, parameters:params }, status:"dispatched" };
+  return { api_version:"1.0", timestamp:isoNow(), issued_by:{ user:session.username, role:"manager" }, target_device:{ device_id:dev.id, device_name:dev.device_name, device_type:dev.device_type, ip_address:dev.ip_address, location:{ building:dev.building, room:dev.room } }, command:{ action:cmd, parameters:params }, status:"dispatched" };
 }
-function updatePreview() { dom.mPreview.textContent = JSON.stringify(buildPayload(), null, 2); }
+function updatePreview() {
+  dom.mPreview.textContent = JSON.stringify(buildPayload(), null, 2);
+  dom.mConfirm.style.display = DESTRUCTIVE_CMDS.includes(dom.mCmd.value) ? 'block' : 'none';
+}
 function fireCommand() {
-  // RBAC: enforced in logic — technician blocked even if DOM is manipulated
-  if (!session || session.role !== 'manager') return;
+  if (!session || session.role !== 'manager') return; // RBAC: enforced in logic
   if (dom.btnFire.disabled) return;
-  const payload = buildPayload();
-  const dev = EQUIPMENT.find(e => e.id === activeEqId);
-  dom.btnFire.disabled = true;
-  setTimeout(() => { dom.btnFire.disabled = false; }, 1000);
-  pendingCount++;
-  const sp = $('s-pending'); if (sp) sp.textContent = pendingCount;
-  appendLog(dev, payload);
+  const payload = buildPayload(); const dev = EQUIPMENT.find(e => e.id === activeEqId);
+  dom.btnFire.disabled = true; setTimeout(() => { dom.btnFire.disabled = false; }, 1000);
+  pendingCount++; const sp = $('s-pending'); if (sp) sp.textContent = pendingCount;
+  commandLog.unshift({ time: fmtFull(), dev, payload });
+  appendLogEntry(dev, payload);
   showToast(`Command dispatched → ${dev.device_name}`);
   closeModal();
 }
 
 // === COMMAND LOG ===
-function appendLog(dev, payload) {
-  const logBody = $('log-body');
-  const logCount = $('log-count');
-  const liveDot = $('live-dot');
-  const empty = logBody.querySelector('.log-empty');
-  if (empty) empty.remove();
-  const el = document.createElement('div');
-  el.className = 'log-entry flash';
+function logEntryHtml(l) {
+  return `<div class="log-entry flash"><div class="log-line"><span class="ts">[${l.time}]</span> <span class="act">DISPATCHED</span> → <span class="dev">${l.dev.device_name}</span> @ ${l.dev.ip_address} — ${l.payload.command.action} <span class="hint">(click to expand)</span></div><div class="log-detail">${JSON.stringify(l.payload, null, 2)}</div></div>`;
+}
+function appendLogEntry(dev, payload) {
+  const logBody = $('log-body'); const logCount = $('log-count'); const liveDot = $('live-dot');
+  if (!logBody) return;
+  const empty = logBody.querySelector('.log-empty'); if (empty) empty.remove();
+  const el = document.createElement('div'); el.className = 'log-entry flash';
   el.innerHTML = `<div class="log-line"><span class="ts">[${fmtFull()}]</span> <span class="act">DISPATCHED</span> → <span class="dev">${dev.device_name}</span> @ ${dev.ip_address} — ${payload.command.action} <span class="hint">(click to expand)</span></div><div class="log-detail">${JSON.stringify(payload, null, 2)}</div>`;
   el.addEventListener('click', () => el.classList.toggle('open'));
   logBody.prepend(el); logBody.scrollTop = 0;
-  if (logCount) logCount.textContent = `${pendingCount} command${pendingCount !== 1 ? 's' : ''}`;
+  if (logCount) logCount.textContent = `${pendingCount} command${pendingCount!==1?'s':''}`;
   if (liveDot) { liveDot.classList.remove('on'); void liveDot.offsetWidth; liveDot.classList.add('on'); }
 }
 function showToast(msg) { dom.toastMsg.textContent = msg; dom.toast.classList.add('show'); setTimeout(() => dom.toast.classList.remove('show'), 2500); }
@@ -566,18 +537,18 @@ function toggleTheme() { const h=document.documentElement; const n=h.getAttribut
 
 // === EVENT LISTENERS ===
 dom.btnLogin.addEventListener('click', doLogin);
-dom.inPass.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-dom.inUser.addEventListener('keydown', e => { if (e.key === 'Enter') dom.inPass.focus(); });
+dom.inPass.addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+dom.inUser.addEventListener('keydown', e => { if (e.key==='Enter') dom.inPass.focus(); });
 dom.btnOut.addEventListener('click', doLogout);
 dom.btnTheme.addEventListener('click', toggleTheme);
 dom.burgerBtn.addEventListener('click', openSidebar);
 dom.sidebarClose.addEventListener('click', closeSidebar);
 dom.sidebarOverlay.addEventListener('click', closeSidebar);
 dom.modalX.addEventListener('click', closeModal);
-dom.modalWrap.addEventListener('click', e => { if (e.target === dom.modalWrap) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeSidebar(); } });
-dom.mCmd.addEventListener('change', () => { dom.volGrp.style.display = dom.mCmd.value === 'set_volume' ? 'block' : 'none'; updatePreview(); });
-dom.mVol.addEventListener('input', () => { dom.volV.textContent = dom.mVol.value; updatePreview(); });
+dom.modalWrap.addEventListener('click', e => { if (e.target===dom.modalWrap) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); closeSidebar(); } if (e.key==='/' && !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) { e.preventDefault(); const s=document.querySelector('.page.active .search-input'); if (s) s.focus(); } });
+dom.mCmd.addEventListener('change', () => { dom.volGrp.style.display=dom.mCmd.value==='set_volume'?'block':'none'; updatePreview(); });
+dom.mVol.addEventListener('input', () => { dom.volV.textContent=dom.mVol.value; updatePreview(); });
 dom.btnFire.addEventListener('click', fireCommand);
 </script>
 </body>
